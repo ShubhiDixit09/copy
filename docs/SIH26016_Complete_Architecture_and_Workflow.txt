@@ -1,0 +1,807 @@
+=== Page 1 ===
+SIH 26016
+Complete System Architecture, Workflow
+and Flowcharts
+Evidence-Backed National Land Acquisition Control Plane
+State systems remain authoritative. The platform
+proves legal, financial, physical and human readiness
+before declaring land construction-ready.
+Designed for nationwide scale, State-specific rules, offline field work, auditable ev-
+idence, compensation reconciliation, R&R safeguards and constructible-front intelli-
+gence.
+05 September 2026
+
+=== Page 2 ===
+SIH 26016 | Complete Architecture Evidence > Dashboard
+1. Architecture objective
+The central design decision
+This is not a replacement land-record database and not merely a dashboard. State land, registra-
+tion, court, finance and clearance systems remain authoritative. The national platform performs four
+jobs:
+1. Exchange: ingest heterogeneous State and ministry data through governed adapters.
+2. Prove: preserve source evidence, history, signatures, contradictions and applicable rules.
+3. Coordinate: route long-running statutory and human workflows with named responsibility .
+4. Decide: compute verified readiness, corridor continuity, payment exceptions and family exclusion
+risks.
+Non-negotiable invariants
+• No status without evidence: a dropdown cannot make a parcel acquired, paid or possessed.
+• No destructive overwrite: corrections create new events and preserve previous facts.
+• No single project state: parcel, claimant, payment and R&R states advance independently .
+• No silent conflict merge: contradictory authoritative sources create an exception.
+• No AI adjudication: AI prioritises and explains; humans decide title, compensation and eligibility .
+• No central PII exposure: use purpose-bound access, field-level redaction and public aggregates.
+• No forced State migration: adapters translate source models into a canonical exchange model.
+System quality targets
+Quality Architecture response
+Nationwide scalability Stateless services, partitioning by State/project,
+asynchronous events, read projections
+Long-running workflows Durable state machine, timers, retries, human
+tasks, effective-dated rule packs
+Legal auditability Bitemporal events, signed evidence, immutable
+audit trail, versioned decisions
+GIS performance PostGIS, vector tiles, geometry simplification,
+cached national aggregates
+Interoperability Versioned APIs, schema registry, source
+snapshots, adapter certification
+Field resilience Offline-first PWA, local encrypted queue,
+idempotent sync, conflict handling
+1
+
+=== Page 3 ===
+SIH 26016 | Complete Architecture Evidence > Dashboard
+2. Complete logical architecture
+SIH 26016 - Federated Evidence-Backed Acquisition Architecture
+State systems remain authoritative. The platform verifies evidence, coordinates work, and computes constructible readiness.
+CHANNELS AND DECISION SURFACES
+National / State cockpit
+Exceptions, forecasts, PCI
+District workbench
+T asks, hearings, approvals
+Field PWA
+Offline survey and possession proof
+Citizen passport
+Entitlements, payments, grievance
+Auditor / public view
+Trace, aggregates, redaction
+SECURE ACCESS EDGE
+WAF + API gateway | ePramaan/SSO | RBAC + ABAC | consent and purpose checks | rate limiting | field-level redaction
+DOMAIN CONTROL PLANE
+Project and
+alignment
+Parcel GIS
+and lineage
+Workflow and
+statutory clocks
+Evidence and
+documents
+Party, family
+and interests
+Award and
+entitlements
+Payment
+reconciliation
+R&R outcomes
+and grievance
+Tasks, alerts
+and notifications
+Policy packs
+and decision trace
+TRUST AND DECISION INTELLIGENCE
+Evidence confidence
+Provenance, freshness, signatures
+Contradiction engine
+RoR-map-court-field conflicts
+Constructibility engine
+PCI, gaps, unlock simulation
+Process intelligence
+Breach risk and next-best action
+Inclusion checks
+Unmatched family and entitlement
+TRUSTED DATA AND EVENT PLATFORM
+Canonical event graph
+Bitemporal parcel-person-rupee state
+PostgreSQL + PostGIS
+Transactional data and geometry
+Versioned object store
+Signed evidence, maps, awards
+Read models and search
+Dashboards, reports, full-text
+Immutable audit ledger
+Who changed what, when and why
+FEDERATED LAND EXCHANGE
+API/CDC/SFTP/signed batch adapters | schema registry | idempotency | canonical mapping | source snapshots | dead-letter quarantine | sync health
+State RoR +
+registration
+BhuNaksha /
+cadastral GIS
+RCCMS +
+eCourts
+PFMS + bank
+acknowledgement
+PARIVESH +
+GatiShakti
+eGazette +
+Bhoomi Rashi
+Cross-cutting: encryption | privacy | observability | backups | disaster recovery | retention
+Read bottom to top: external government rails feed a federated exchange; canonical events and evidence power domain workflows; intelligence
+produces verified decisions; role-specific surfaces expose only necessary data.
+2
+
+=== Page 4 ===
+SIH 26016 | Complete Architecture Evidence > Dashboard
+3. Component responsibilities
+Experience and access
+Component Primary users Responsibility
+National/State cockpit Ministries, State nodal teams, policy
+makers
+Exceptions, PCI, forecasts, comparison
+and escalation - no raw PII
+District workbench Collector, LAA, survey/revenue, legal,
+R&R, finance
+Work queues, scrutiny, hearings,
+evidence correction, approvals and SLA
+ownership
+Field PWA Surveyor, possession team, R&R verifier Offline surveys, geo/time evidence,
+household verification and later sync
+Citizen passport Affected person/family Parcel case, entitlements, payment
+state, grievance, appointments and
+consent
+Audit/public view Auditor, authorised oversight, public Full trace for auditors; redacted
+aggregate transparency for public users
+Domain modules
+Module Owns Emits important events
+Project and alignment Project authority, corridor, chainage,
+funding, phases
+ProjectSubmitted, AlignmentVersioned
+Parcel GIS and lineage Parcel versions, ULPIN/source IDs,
+split/merge, acquired/residual areas
+ParcelMatched, ParcelSplit,
+GeometryFrozen
+Workflow and clocks State machine, tasks, hearings, due
+dates, blockers
+TaskAssigned, GateBlocked,
+DeadlineBreached
+Evidence and documents Evidence metadata, versions,
+signatures, retention, access labels
+EvidenceAdded, EvidenceSuperseded,
+SignatureFailed
+Party/family/interests Person, household, rights, relationship,
+vulnerability, representation
+HouseholdObserved, InterestVerified,
+PossibleExclusion
+Award and entitlement Valuation snapshot, award, entitlement
+lines, legal basis
+AwardDeclared, EntitlementCreated
+Payment reconciliation Obligation, sanction, payment
+instruction, bank ACK, receipt/exception
+PaymentAcknowledged, PaymentFailed,
+PaymentReconciled
+R&R and grievance R&R plan, services, site readiness,
+outcomes, grievance/appeal
+RNRDelivered, OutcomeVerified,
+GrievanceEscalated
+Policy packs Effective rules, evidence requirements,
+clocks and decision tables
+PolicyEvaluated, ConformanceFailed
+Notifications T emplate, channel, delivery status,
+retry, preferred language
+NoticeQueued, NoticeDelivered,
+NoticeFailed
+Recommended implementation boundary
+For SIH, implement these as a modular monolith with one PostgreSQL/PostGIS database and a trans-
+actional outbox. Keep clean domain modules and versioned APIs. Split high-load components - GIS
+tiles, documents, notifications, analytics and ML - only in the production scale path. This is credible
+and avoids a fragile weekend microservice demo.
+3
+
+=== Page 5 ===
+SIH 26016 | Complete Architecture Evidence > Dashboard
+4. End-to-end acquisition workflow
+End-to-End Land Acquisition Workflow - Parallel Tracks and Evidence Gates
+Project, parcel, payment and family states advance independently. Project progress is derived; it is never a single manually selected status.
+1 Initiate 2 Verify 3 Notify 4 Resolve 5 Award 6 Deliver 7 Possess 8 Assure
+Project agency
+Proposal +
+alignment
+Purpose, budget,
+authority
+Scrutiny +
+feasibility
+Return with reasons
+Submit notification
+Publish disclosure
+Respond to
+objections
+Revise alignment if
+needed
+Approve award
+package
+Sign handover
+conditions
+Coordinate payment
++ R&R
+Track dependencies
+Request possession
+Package for field team
+Receive usable
+front
+Close residual actions
+District / legal
+Assign LAA /
+Collector
+Choose policy pack
+Legal basis +
+approvals
+Start statutory clocks
+Issue notice
+Open objections
+Hearing + case link
+Record speaking order
+Declaration + award
+Version and sign
+Escalate SLA
+breaches
+Resolve court blocks
+Witness possession
+Sign memorandum
+Audit closure
+Retention schedule
+Land + GIS
+Import corridor
+Create parcel
+candidates
+RoR-map-field match
+Lineage + encumbrances
+Freeze notified
+geometry
+Publish parcel extract
+Correct
+contradictions
+Preserve prior versions
+Fix
+acquired/residual
+area
+Bind award to geometry
+Track clearance
+links
+Prepare chainage
+segments
+Geo/time field
+proof
+Boundary + asset record
+Compute PCI
+Identify remaining gaps
+Finance
+Estimate envelope
+Create finance case
+Validate
+beneficiary
+Bank/account checks
+Reserve sanction
+No payment yet
+Resolve
+identity/heir
+issues
+Update beneficiary
+version
+Create award
+obligation
+Obligation control
+total
+PFMS -> bank ACK ->
+receipt
+Reconcile exceptions
+Confirm paid or
+lawful deposit
+Block false completion
+Final
+reconciliation
+Audit mismatch report
+R&R + citizen
+Plan SIA
+Define survey universe
+Enumerate
+households
+Rights + vulnerability
+Public consultation
+Accessible disclosure
+Match SIA to
+claimants
+Grievance + appeal
+Generate
+entitlements
+Flag invisible families
+Deliver R&R
+services
+Verify readiness
+Consent/acknowledge
+ment
+Safe relocation
+3/6/12 month
+outcomes
+Livelihood restoration
+System decisions
+Create case ID
+Snapshot source inputs
+Confidence +
+contradiction
+BLOCK if critical
+Evidence gate
+Clock + alert
+Exception owner +
+SLA
+Re-evaluate on new
+event
+Policy conformance
+trace
+No AI adjudication
+Payment/R&R gates
+Do not infer success
+Construction-ready
+gate
+Verified evidence only
+Reported vs
+verified vs
+constructible dashboard
+UNIVERSAL EXCEPTION LOOP
+Missing, stale or contradictory evidence -> BLOCKED/DISPUTED -> named owner + reason + SLA
+corrected signed event -> policy and evidence gates re-run -> resume from same stage
+Important: legal, GIS, finance and R&R tracks run in parallel but converge at evidence gates. Any gate failure creates an owned exception and
+resumes from the same stage after corrected evidence arrives.
+4
+
+=== Page 6 ===
+SIH 26016 | Complete Architecture Evidence > Dashboard
+5. Workflow stage specification
+Stage 1 - Initiate
+• Input: project purpose, requiring authority, approved/preliminary corridor, funding and applicable acquisition
+regime.
+• Actions: create immutable case ID; select State/jurisdiction policy pack; import alignment; identify candidate
+parcels; initialise SIA and finance cases.
+• Gate: authority, purpose, geometry and required proposal documents present.
+• Output: submitted project version and parcel-candidate inventory .
+Stage 2 - Verify
+• Cross-check RoR, registration, cadastral geometry, court/revenue cases and field observations.
+• Build parcel lineage and party-interest graph; enumerate affected households and vulnerabilities.
+• Generate contradiction cases. Critical conflicts block only the affected parcel/stage, not the entire platform.
+• Output: evidence confidence profile and verified/not-verified parcel inventory .
+Stage 3 - Notify
+• Freeze notified geometry and source snapshot; issue statutory notice; publish accessible citizen extract.
+• Start effective statutory clock and delivery tracking; record failed service and re-service action.
+• Open objection, hearing and grievance channels linked to the exact notification version.
+Stage 4 - Resolve
+• Conduct hearings; link RCCMS/eCourt matters; record speaking orders and corrections.
+• Resolve ownership/heir, geometry and family-enumeration contradictions without rewriting prior versions.
+• Re-run policy and evidence gates after every corrective event.
+Stage 5 - Award
+• Freeze acquired/residual geometry, valuation inputs, affected-interest set and entitlement schedule.
+• Generate digitally signed award version and obligation control total.
+• Block award finalisation if a high-risk unmatched household or unresolved geometry/title contradiction remains.
+Stage 6 - Deliver
+• Send payment instruction; reconcile sanction, PFMS response, bank acknowledgement and beneficiary re-
+ceipt/lawful deposit.
+• Deliver R&R services and independently verify site/service readiness.
+• A generated instruction is not payment completion; a service invoice is not an R&R outcome.
+Stage 7 - Possess
+• Field team captures offline geo/time evidence, parcel boundary, assets, witnesses and signed possession mem-
+orandum.
+• Confirm applicable payment/R&R/clearance dependencies; create signed proof-of-possession package.
+• Mark parcel construction-ready only after all applicable gates pass.
+Stage 8 - Assure and close
+• Compute PCI, total buildable length, blocked gaps and highest-unlock action.
+• Handover verified continuous fronts to the implementing agency .
+• Continue 3/6/12-month family outcomes, grievances, residual parcel issues and final financial reconciliation.
+• Close only after audit pack, retention classification and unresolved exceptions are accepted by authorised
+roles.
+5
+
+=== Page 7 ===
+SIH 26016 | Complete Architecture Evidence > Dashboard
+6. Evidence ingestion and decision flow
+Evidence Ingestion and Decision Flow
+Every incoming change becomes a replayable event. Conflicts become explicit work; they are never silently overwritten.
+1 Source input
+API / CDC / signed batch /
+field PWA
+2 Inbound controls
+Auth, malware scan, schema,
+signature, idempotency
+3 Source snapshot
+Store original payload +
+source time + checksum
+4 Canonical mapping
+Parcel, party, right, case,
+payment, evidence event
+5 Entity + lineage
+Match identifiers; preserve
+split/merge and source IDs
+6 Confidence checks
+Authority, freshness,
+agreement, completeness
+7 Contradiction rules
+RoR vs map vs court vs
+award vs field
+8 Policy/evidence gate
+Required evidence +
+effective rule + statutory
+clock
+9 Commit event
+Transactional write +
+outbox + immutable audit
+10 Update projections
+GIS/read models/search/metr
+ics/notifications
+Quarantine + exception work item
+Critical conflict or validation failure
+Reason code | source | owner | SLA | required evidence
+Verified outputs
+Parcel timeline | PCI | payment status
+family/R&R graph | dashboards | reports
+gate fails
+corrected event passes
+reliable read models
+Design invariant
+Source systems remain authoritative. The platform stores provenance and state transitions; it never rewrites history or treats a dashboard field as legal truth.
+Critical behaviour: a failed mapping, signature, confidence rule or policy gate goes to quarantine with reason, owner, SLA and required evidence.
+The source payload remains intact for replay and audit.
+6
+
+=== Page 8 ===
+SIH 26016 | Complete Architecture Evidence > Dashboard
+7. Independent state machines and derived readiness
+Independent State Machines - The Key Anti-Dashboard Design
+A project cannot be marked complete by one dropdown. Readiness is derived from independently verified parcel, payment, family and R&R states.
+PARCEL
+candidate notified awarded possession
+verified
+construction-
+ready
+CLAIMANT
+observed in SIA identity
+resolved
+interest
+verified
+entitlement
+mapped
+no unresolved
+exclusion
+PAYMENT
+obligation
+created
+sanctioned PFMS instructed bank
+acknowledged
+receipt / lawful
+deposit
+R&R
+plan approved service
+delivered
+family verified relocation safe outcome
+sustained
+Evidence gate
+Applicable rule pack
++ signed evidence
++ no critical exception
+Derived project readiness
+Reported % | Verified % | PCI
+blocked kilometres | families restored
+Exception-first cockpit
+What changed? Why blocked? Who owns it?
+What evidence is missing? How much frontage will this action unlock?
+Why this matters: ”project complete” is a calculated view. A parcel may be possessed while one payment is failed or a family outcome remains
+unresolved; the dashboard must expose that truth instead of collapsing it.
+7
+
+=== Page 9 ===
+SIH 26016 | Complete Architecture Evidence > Dashboard
+8. Canonical event and data model
+Core entities
+Entity Essential fields Critical relationship
+Project project ID, authority, purpose,
+jurisdiction, policy pack, dates
+has alignment versions and
+acquisition cases
+AlignmentSegment geometry, chainage start/end,
+version, clearance links
+intersects parcel versions
+ParcelVersion ULPIN/source IDs, geometry,
+area, valid/recorded times,
+provenance
+parent/split/merge; supports
+acquired/residual portions
+Party / Household tokenised ID, relationship,
+communication preference,
+vulnerability
+holds one or more interests;
+appears in observations
+Interest owner/tenant/livelihood/FRA/heir
+type, share, evidence
+connects party/household to
+parcel
+SIAObservation survey event, enumerator,
+location, finding, evidence
+creates affected-family
+universe
+Case objection/court/revenue/grievance
+type, status, order, due date
+blocks specific evidence gate
+when applicable
+AwardVersion legal basis, valuation inputs,
+geometry snapshot, signature
+creates entitlement obligations
+Entitlement beneficiary, component,
+amount/service, eligibility basis
+connects award to payment or
+R&R service
+PaymentEvent instruction, PFMS ref, bank ACK,
+amount, failure reason
+reconciles against entitlement
+obligation
+PossessionEvent parcel version, geo/time proof,
+witness, memorandum
+supports construction-ready
+gate
+RNROutcome service/outcome, due date,
+verification, follow-up
+connects family to sustained
+outcome
+EvidenceArtifact type, hash, signer, source,
+access class, supersedes
+supports any entity/event
+without becoming the fact itself
+WorkflowEvent event type, actor, source time,
+recorded time, causation ID
+immutable source for state
+projections
+PolicyPack jurisdiction, legal regime,
+effective dates, rules, evidence
+matrix
+evaluates events at the correct
+historical rule version
+Event envelope
+Every integration and internal mutation uses the same envelope:
+event_id, event_type, aggregate_type, aggregate_id, source_system, source_record_id, source_time,
+recorded_time, schema_version, policy_version, actor, correlation_id, causation_id, payload,
+evidence_refs, signature/checksum, sensitivity_label
+Rules:
+• Global uniqueness plus idempotency key prevents duplicates during retry .
+• source_time and recorded_time provide bitemporal auditability .
+• Corrections reference supersedes_event_id; old events remain queryable.
+• PII is tokenised; sensitive evidence is fetched only after role, purpose and case checks.
+8
+
+=== Page 10 ===
+SIH 26016 | Complete Architecture Evidence > Dashboard
+9. Core algorithms
+Possession Continuity Index (PCI)
+1. Intersect the approved alignment with parcel geometries and convert results into ordered chainage
+intervals.
+2. Evaluate ready(interval) from applicable parcel, payment, possession, R&R and clearance gates.
+3. Merge adjacent ready intervals; calculate the longest uninterrupted ready run.
+4. Rank each blocking parcel by simulated increase in continuous ready length if its exception is re-
+solved.
+𝑃 𝐶𝐼 =
+max(continuous evidence-ready run length )
+total alignment length
+Display total acquired area , verified area , total buildable length , longest continuous front ,
+PCI, blocked kilometres and highest-unlock parcel separately .
+Evidence confidence and contradiction
+Confidence is explanatory, not a legal verdict. Show the component reasons:
+• Source authority and signature validity .
+• Freshness against source-specific tolerance.
+• Cross-source agreement on identity, geometry, ownership/interest and amount.
+• Completeness of mandatory evidence under the active policy pack.
+• Field evidence quality and independent confirmation.
+Hard contradictions - invalid parcel ID, geometry mismatch above tolerance, active blocking case,
+award/payment mismatch, duplicate reference, missing signature - create deterministic exceptions
+regardless of score.
+No Family Invisible rule
+Affected-family universe = union(SIA observations, field verification, recorded interests,
+claims/objections and recognised livelihood dependencies)
+Flag every household with no resolved mapping to an award decision, entitlement/R&R decision and
+communicated reason. “Not eligible” is a valid reviewed outcome; disappearing from the data is
+not.
+Delay intelligence
+Start with rule-based statutory/SLA risk. When sufficient real event history exists, use survival analy-
+sis/process mining to estimate time-to-next-stage. Always expose evidence, uncertainty and recom-
+mended human action. Never train a black-box model on self-reported status snapshots.
+9
+
+=== Page 11 ===
+SIH 26016 | Complete Architecture Evidence > Dashboard
+10. Integration architecture
+Adapter contract
+Every source adapter must implement:
+• pullSnapshot(cursor) or authenticated inbound event endpoint.
+• Source schema validation and schema-version declaration.
+• Stable source record ID and idempotency key .
+• Signed payload/checksum and source timestamp.
+• Canonical mapping with unmapped-field preservation.
+• Health, last-success, lag and rejection metrics.
+• Replay from cursor plus dead-letter reprocessing.
+Integration modes
+Source capability Integration mode Safety mechanism
+Mature API REST/event webhook OAuth/mTLS, idempotency,
+contract tests
+Database change feed CDC into connector read-only replica, checkpoint,
+source lag
+Periodic export Signed SFTP/batch manifest, checksum, schema
+version, replay
+No digital interface Authorised manual upload digital signature,
+maker-checker, mandatory
+provenance
+Field offline Encrypted sync queue device binding, idempotent
+batch, conflict review
+External systems to integrate, not rebuild
+• State RoR, registration and cadastral/BhuNaksha systems; preserve State identifiers and ULPIN
+where available.
+• RCCMS/eCourt for pending land/revenue disputes.
+• PFMS and bank acknowledgements for reconciliation.
+• PARIVESH and approved PM GatiShakti alignment/clearance references.
+• e-Gazette/Bhoomi Rashi or ministry-specific acquisition systems.
+For SIH, demonstrate three realistic mock adapters - land record/cadastral, court case and
+PFMS/bank - with the exact envelope, source-health status and contradiction handling. Do not claim
+live government access.
+10
+
+=== Page 12 ===
+SIH 26016 | Complete Architecture Evidence > Dashboard
+11. Security, privacy and governance
+Identity and authorisation
+• Government SSO/ePramaan-compatible identity boundary; MFA for privileged roles.
+• RBAC for organisational responsibility plus ABAC for State, district, project, case, purpose and data
+sensitivity .
+• Maker-checker for awards, payment changes, possession and policy-pack publication.
+• Short-lived tokens, mTLS service identity, secrets manager and device binding for field sync.
+Data protection
+• TLS in transit; envelope encryption at rest; centrally governed key rotation.
+• PII tokenisation and separate identity vault; dashboards query pseudonymous IDs.
+• Field-level redaction; public views contain aggregates and generalised geometries only .
+• Consent/preference is recorded where relevant, but statutory processing authority is represented
+separately .
+• Configurable retention and legal hold; secure deletion after approved retention expiry .
+Evidence and audit
+• Versioned object storage with object lock/WORM for final evidence packages.
+• Hash and digital signature prove integrity; blockchain is unnecessary unless cross-agency key gov-
+ernance is explicitly solved.
+• Immutable audit event: actor, purpose, old/new reference, reason, timestamp, device/service and
+correlation ID.
+• Every automated suggestion records model/rule version, inputs, confidence and human disposition.
+Availability and operations
+• OpenT elemetry tracing, metrics and structured logs; sync-lag and dead-letter alerts.
+• Point-in-time database recovery, replicated object storage, tested backup restoration and regional
+DR plan.
+• Graceful degradation: field collection continues offline; integrations retry without duplicate state
+transitions.
+11
+
+=== Page 13 ===
+SIH 26016 | Complete Architecture Evidence > Dashboard
+12. Deployment and technology stack
+Hackathon implementation
+Layer Recommended choice Why
+Web Next.js + T ypeScript Fast dashboard/workbench
+development; SSR where useful
+Maps OpenLayers or MapLibre +
+GeoServer
+Standards-based parcel and
+vector-layer handling
+Field Installable PWA with encrypted
+IndexedDB
+One codebase; offline queue
+and later synchronisation
+Backend NestJS modular monolith T yped modules, guards, APIs
+and background jobs
+T ransaction/GIS PostgreSQL + PostGIS Strong transactions, spatial
+joins and lineage
+Documents MinIO/S3-compatible versioned
+object store
+Signed evidence and
+immutable final packages
+Jobs/events T ransactional outbox +
+Redis/BullMQ
+Reliable MVP workflows without
+Kafka complexity
+Intelligence Python FastAPI service PCI/geospatial computation and
+explainable models
+Auth Keycloak or equivalent OIDC
+provider
+Real RBAC/SSO demo instead of
+hard-coded roles
+Observability OpenT elemetry +
+Prometheus/Grafana
+T race cross-module failures and
+integration lag
+Production evolution
+• Deploy containers on NIC Cloud/MeghRaj-compatible Kubernetes.
+• Move durable human workflow/timers to Camunda/T emporal; publish domain events through Kafka.
+• Separate GIS tile, document, notification and analytics workloads when measured load requires it.
+• Partition large event/projection tables by State and project; keep national aggregates in refreshed
+read models.
+• Add OpenSearch for document/full-text search and a dedicated analytics store only after query
+patterns justify it.
+Deployment topology
+Internet/Gov network -> WAF/load balancer -> stateless app/API pods -> workflow/domain modules
+-> PostgreSQL/PostGIS + object store + cache/outbox -> adapters through controlled egress/API
+gateway
+Administrative and evidence stores stay on private subnets. Public aggregate views use separate read
+projections, never direct queries against case/PII tables.
+12
+
+=== Page 14 ===
+SIH 26016 | Complete Architecture Evidence > Dashboard
+13. MVP build sequence and demo trace
+P0 - must work end to end
+1. Create project and import a synthetic 12 km alignment with parcel polygons.
+2. Ingest land-record, court and payment events through three mock adapters.
+3. Show source snapshots, parcel lineage and one critical contradiction.
+4. Run policy/evidence gates and generate owned exception tasks.
+5. Compute PCI, blocked kilometres and highest-unlock parcel.
+6. Detect four SIA households missing from award/R&R mapping.
+7. Reconcile one successful and one failed payment.
+8. Add field possession proof and watch verified readiness update through events.
+P1 - only after P0 is polished
+• Offline field queue and signed proof package.
+• Citizen entitlement/payment/grievance passport.
+• R&R service verification and one 3-month outcome.
+• Rule-based delay explanation and notification delivery tracking.
+Exact 4-minute walkthrough
+Time Screen Judge-visible point
+0:00-0:30 Project cockpit Ordinary metric says 86%
+acquired; verified progress
+is 61%; PCI is 42%
+0:30-1:10 Corridor gap view Three parcels break the
+front; P-118 has the highest
+unlock value
+1:10-2:00 Parcel evidence timeline Succession conflict, court
+case and source provenance
+explain the block
+2:00-2:40 Family/entitlement graph Four livelihood-dependent
+households exist in SIA but
+not award/R&R
+2:40-3:20 Payment reconciliation Payment instruction exists,
+but bank acknowledgement
+failed
+3:20-4:00 Resolve simulation Correct evidence raises PCI
+from 42% to 78%; task and
+audit trace are generated
+Acceptance tests
+• Replaying the same adapter batch creates no duplicate event or payment.
+• Correcting a parcel preserves the old geometry and source snapshot.
+• A critical contradiction prevents construction-ready state.
+• Failed bank acknowledgement prevents payment-complete state.
+• Unmatched SIA household remains visible until a reviewed outcome exists.
+• Resolving the highest-criticality parcel changes PCI exactly as predicted.
+• Public role cannot access PII or unredacted evidence.
+• Offline field retry produces one possession event, not duplicates.
+13
+
+=== Page 15 ===
+SIH 26016 | Complete Architecture Evidence > Dashboard
+14. Final architecture narrative for judges
+Data enters through federated adapters from State land records, cadastral maps, courts,
+finance and clearance systems. We preserve the original source snapshot, map it into a
+canonical parcel-person-payment event graph, and run deterministic contradiction and pol-
+icy gates. Legal, GIS, finance and R&R workflows remain separate, so a project can never
+be marked complete by one misleading status. Verified parcel events feed our Possession
+Continuity Index, which shows the actual uninterrupted construction-ready corridor and the
+parcel whose resolution unlocks the most work. At the same time, the claimant-entitlement
+graph ensures no affected family disappears between SIA, award, payment and rehabilita-
+tion. Decision-makers see exceptions and accountable actions; citizens see only their own
+entitlement journey; auditors can reconstruct what was known when.
+Final one-line architecture
+Federated sources -> source-preserving events -> contradiction and policy gates -> in-
+dependent parcel/payment/family/R&R states -> verified constructibility and accountable
+action.
+Authoritative research anchors
+• DoLR - DILRMP , ULPIN, NGDRS, eCourt linkage, RCCMS
+• LACRRIS launch and ranking design
+• Bhoomi Rashi scope
+• PM GatiShakti scope
+• CAG Bharatmala Audit 2023
+• CAG T amil Nadu STAR 2.0 Audit
+• DoLR/NCAER - Evaluation of Quality of Land Records
+• RFCTLARR Act and Rules
+• World Bank ESS5
+• ISO 19152-1:2024 LADM
+14
+
