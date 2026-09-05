@@ -13,6 +13,7 @@
 | Version | Date | Author / Role | Summary of Changes |
 | :--- | :--- | :--- | :--- |
 | **1.0.0** | 2026-09-05 | Antigravity AI / Bhavesh Bhardwaj | Complete baseline SRS synthesized from SIH 26016 Architecture & Workflow Specification. |
+| **1.1.0** | 2026-09-05 | Antigravity AI / Bhavesh Bhardwaj | Added Section 7.1.1: Native C++ Acceleration for PCI engine & established formal CHANGELOG. |
 
 ---
 

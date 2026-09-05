@@ -36,6 +36,7 @@ dharti/
 
 - **[Software Requirements Specification (SRS)](docs/SRS.md)**: Main requirements document, updated iteratively as new features and documents are introduced.
 - **[Architectural Overview](docs/ARCHITECTURE.md)**: System design principles, layers, and modularity guidelines.
+- **[Changelog](CHANGELOG.md)**: Complete chronological history of changes, features, and releases.
 
 ---
 
