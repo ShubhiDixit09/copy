@@ -41,6 +41,11 @@ public:
     std::vector<models::ContradictionCase> generate_exception_cases(
         const std::vector<models::Household>& missing_households
     ) const;
+
+    /**
+     * @brief Ingests surveyed households from real SIA JSON file.
+     */
+    std::vector<models::Household> ingest_from_file(const std::string& sia_file_path) const;
 };
 
 } // namespace services

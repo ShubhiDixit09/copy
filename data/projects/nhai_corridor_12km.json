@@ -1,0 +1,18 @@
+{
+  "project_metadata": {
+    "project_id": "NHAI-NE7-PKG-04",
+    "project_name": "Bengaluru-Chennai Expressway (NE-7) - Package IV",
+    "requiring_body": "National Highways Authority of India (NHAI)",
+    "competent_authority": "Special Land Acquisition Officer (CALA), Devanahalli",
+    "jurisdiction_state": "Karnataka",
+    "district": "Bengaluru Rural",
+    "taluk": "Devanahalli",
+    "alignment_length_km": 12.0,
+    "chainage_start_km": 0.0,
+    "chainage_end_km": 12.0,
+    "gazette_notification_ref": "S.O. 2418(E) dated 14-06-2023",
+    "statutory_act": "National Highways Act, 1956 read with RFCTLARR Act, 2013",
+    "currency": "INR",
+    "coordinate_reference_system": "EPSG:4326 (WGS84)"
+  }
+}

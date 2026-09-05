@@ -1,4 +1,7 @@
 #include "dharti/services/workflow_coordinator.hpp"
+#include "dharti/adapters/land_record_adapter.hpp"
+#include "dharti/adapters/court_adapter.hpp"
+#include "dharti/adapters/finance_adapter.hpp"
 #include <sstream>
 
 namespace dharti {
@@ -41,6 +44,64 @@ void WorkflowCoordinator::register_parcel(
         ev.transaction_time = "2026-09-01T10:05:00Z";
         ev.recorded_by = "WORKFLOW_COORDINATOR";
         event_store_->append_event(ev);
+    }
+}
+
+void WorkflowCoordinator::ingest_project_package(
+    const std::string& /* project_file */,
+    const std::string& ror_file,
+    const std::string& cadastral_file,
+    const std::string& court_file,
+    const std::string& pfms_file
+) {
+    // 1. Ingest land records and cadastral geometry
+    adapters::LandRecordAdapter land_adapter("KA");
+    auto land_records = land_adapter.ingest_from_files(ror_file, cadastral_file);
+
+    // 2. Ingest court dockets
+    adapters::CourtAdapter court_adapter("KARNATAKA_HC");
+    auto court_records = court_adapter.ingest_from_file(court_file);
+
+    // 3. Register each parcel
+    for (const auto& lr : land_records) {
+        models::ParcelVersion pv;
+        pv.parcel_id = lr.parcel_id;
+        pv.ulpin = lr.canonical_khasra_code;
+        pv.survey_number = lr.canonical_khasra_code;
+        pv.ror_area_sqm = lr.ror_area_sqm;
+        pv.cadastral_area_sqm = lr.cadastral_area_sqm;
+        pv.ror_owner = lr.owner_name;
+        pv.field_claimant = lr.owner_name;
+        pv.has_active_stay = false;
+
+        // Check against court records
+        for (const auto& cr : court_records) {
+            if (cr.target_khasra_code == lr.canonical_khasra_code && cr.has_active_stay) {
+                pv.has_active_stay = true;
+                pv.field_claimant = "Disputed / " + lr.owner_name;
+                break;
+            }
+        }
+
+        register_parcel(pv, lr.chainage_start_km, lr.chainage_end_km);
+    }
+
+    // 4. Ingest finance records
+    if (payment_reconciler_) {
+        adapters::FinanceAdapter finance_adapter("PFMS_DIRECT");
+        auto payment_records = finance_adapter.ingest_from_file(pfms_file);
+        for (const auto& pr : payment_records) {
+            models::PaymentRecord obligation;
+            obligation.payment_id = pr.mandate_id;
+            obligation.parcel_id = pr.parcel_id;
+            obligation.amount_inr = pr.net_amount_inr;
+            obligation.state = models::PaymentState::OBLIGATION_CREATED;
+            payment_reconciler_->register_obligation(obligation);
+
+            if (pr.is_settled || pr.is_failed) {
+                payment_reconciler_->reconcile_advice(pr);
+            }
+        }
     }
 }
 

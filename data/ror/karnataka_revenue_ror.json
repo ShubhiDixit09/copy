@@ -1,0 +1,64 @@
+{
+  "source_system": "BHOOMI_REVENUE_ROR",
+  "state_code": "KA",
+  "district": "Bengaluru Rural",
+  "taluk": "Devanahalli",
+  "village": "Kundana",
+  "records": [
+    {
+      "survey_number": "116",
+      "sub_division": "1",
+      "khata_number": "KH-881",
+      "owner_name": "Krishnappa Gowda",
+      "extent_sqm": 30000.0,
+      "tenure_type": "Patta / Ryotwari",
+      "soil_classification": "Dry Agricultural (Kharab Class B)",
+      "is_encumbered": false,
+      "encumbrance_details": "None"
+    },
+    {
+      "survey_number": "117",
+      "sub_division": "3B",
+      "khata_number": "KH-882",
+      "owner_name": "Anjanappa M",
+      "extent_sqm": 20000.0,
+      "tenure_type": "Patta / Ryotwari",
+      "soil_classification": "Garden Land (Bagayat)",
+      "is_encumbered": false,
+      "encumbrance_details": "None"
+    },
+    {
+      "survey_number": "118",
+      "sub_division": "2A",
+      "khata_number": "KH-883",
+      "owner_name": "Ramesh Kumar",
+      "extent_sqm": 15000.0,
+      "tenure_type": "Patta / Ryotwari",
+      "soil_classification": "Dry Agricultural",
+      "is_encumbered": true,
+      "encumbrance_details": "High Court Injunction Order WP 4021/2023 noted in Column 11"
+    },
+    {
+      "survey_number": "119",
+      "sub_division": "1",
+      "khata_number": "KH-884",
+      "owner_name": "Munivenkatamma",
+      "extent_sqm": 35000.0,
+      "tenure_type": "Patta / Ryotwari",
+      "soil_classification": "Dry Agricultural",
+      "is_encumbered": false,
+      "encumbrance_details": "None"
+    },
+    {
+      "survey_number": "120",
+      "sub_division": "4",
+      "khata_number": "KH-885",
+      "owner_name": "Doddagangappa",
+      "extent_sqm": 20000.0,
+      "tenure_type": "Patta / Ryotwari",
+      "soil_classification": "Wet Agricultural",
+      "is_encumbered": false,
+      "encumbrance_details": "None"
+    }
+  ]
+}

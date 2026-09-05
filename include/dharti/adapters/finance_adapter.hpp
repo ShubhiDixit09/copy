@@ -63,6 +63,11 @@ public:
      */
     NormalizedPaymentRecord ingest_payment_advice(const RawPFMSAdvice& advice);
 
+    /**
+     * @brief Ingest PFMS / Treasury payment advice records from real JSON file.
+     */
+    std::vector<NormalizedPaymentRecord> ingest_from_file(const std::string& pfms_file_path);
+
     size_t successful_disbursements() const { return success_count_; }
     size_t failed_disbursements() const { return failed_count_; }
 

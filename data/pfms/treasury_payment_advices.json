@@ -1,0 +1,90 @@
+{
+  "source_system": "PFMS_GOI_CENTRAL",
+  "treasury_code": "PFMS-NHAI-DBT-KARNATAKA",
+  "advices": [
+    {
+      "sanction_order_no": "SO-NHAI-NE7-2026-081",
+      "payment_mandate_id": "MANDATE-NHAI-101-A",
+      "parcel_id": 101,
+      "claimant_token": "CLAIMANT-TOK-2901-01",
+      "gross_amount_inr": 20000000.0,
+      "solatium_amount_inr": 20000000.0,
+      "interest_amount_inr": 2000000.0,
+      "net_payable_inr": 42000000.0,
+      "bank_utr_reference": "SBIN426245890101",
+      "credit_status": "SUCCESS",
+      "error_code": "",
+      "settlement_date": "2026-08-20T11:15:00Z"
+    },
+    {
+      "sanction_order_no": "SO-NHAI-NE7-2026-082",
+      "payment_mandate_id": "MANDATE-NHAI-102-A",
+      "parcel_id": 102,
+      "claimant_token": "CLAIMANT-TOK-2901-02",
+      "gross_amount_inr": 15000000.0,
+      "solatium_amount_inr": 15000000.0,
+      "interest_amount_inr": 1500000.0,
+      "net_payable_inr": 31500000.0,
+      "bank_utr_reference": "SBIN426245890102",
+      "credit_status": "SUCCESS",
+      "error_code": "",
+      "settlement_date": "2026-08-21T14:30:00Z"
+    },
+    {
+      "sanction_order_no": "SO-NHAI-NE7-2026-083-INIT",
+      "payment_mandate_id": "MANDATE-NHAI-118-A",
+      "parcel_id": 118,
+      "claimant_token": "CLAIMANT-TOK-2901-18",
+      "gross_amount_inr": 21428571.0,
+      "solatium_amount_inr": 21428571.0,
+      "interest_amount_inr": 2142858.0,
+      "net_payable_inr": 45000000.0,
+      "bank_utr_reference": "",
+      "credit_status": "REJECTED",
+      "error_code": "AC_FROZEN_BY_AUTHORITY",
+      "settlement_date": "2026-08-22T09:45:00Z"
+    },
+    {
+      "sanction_order_no": "SO-NHAI-NE7-2026-083-FINAL",
+      "payment_mandate_id": "MANDATE-NHAI-118-B",
+      "parcel_id": 118,
+      "claimant_token": "CLAIMANT-TOK-2901-18",
+      "gross_amount_inr": 21428571.0,
+      "solatium_amount_inr": 21428571.0,
+      "interest_amount_inr": 2142858.0,
+      "net_payable_inr": 45000000.0,
+      "bank_utr_reference": "SBIN426245890118",
+      "credit_status": "SUCCESS",
+      "error_code": "",
+      "settlement_date": "2026-09-03T16:20:00Z"
+    },
+    {
+      "sanction_order_no": "SO-NHAI-NE7-2026-084",
+      "payment_mandate_id": "MANDATE-NHAI-104-A",
+      "parcel_id": 104,
+      "claimant_token": "CLAIMANT-TOK-2901-04",
+      "gross_amount_inr": 25000000.0,
+      "solatium_amount_inr": 25000000.0,
+      "interest_amount_inr": 2500000.0,
+      "net_payable_inr": 52500000.0,
+      "bank_utr_reference": "SBIN426245890104",
+      "credit_status": "SUCCESS",
+      "error_code": "",
+      "settlement_date": "2026-08-24T10:10:00Z"
+    },
+    {
+      "sanction_order_no": "SO-NHAI-NE7-2026-085",
+      "payment_mandate_id": "MANDATE-NHAI-105-A",
+      "parcel_id": 105,
+      "claimant_token": "CLAIMANT-TOK-2901-05",
+      "gross_amount_inr": 15000000.0,
+      "solatium_amount_inr": 15000000.0,
+      "interest_amount_inr": 1500000.0,
+      "net_payable_inr": 31500000.0,
+      "bank_utr_reference": "",
+      "credit_status": "PENDING",
+      "error_code": "AWAITING_CPSMS_CLEARANCE",
+      "settlement_date": "2026-08-25T12:00:00Z"
+    }
+  ]
+}

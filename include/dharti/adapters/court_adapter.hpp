@@ -61,6 +61,11 @@ public:
     NormalizedCourtRecord ingest_docket(const RawCourtDocket& docket);
 
     /**
+     * @brief Ingest eCourts / RCCMS dockets from real JSON file.
+     */
+    std::vector<NormalizedCourtRecord> ingest_from_file(const std::string& court_file_path);
+
+    /**
      * @brief Check if a normalized record carries an active stay order.
      */
     bool is_stay_active(const NormalizedCourtRecord& record) const;

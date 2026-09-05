@@ -1,4 +1,5 @@
 #include "dharti/adapters/finance_adapter.hpp"
+#include "dharti/utils/json.hpp"
 #include <sstream>
 
 namespace dharti {
@@ -67,5 +68,33 @@ NormalizedPaymentRecord FinanceAdapter::ingest_payment_advice(const RawPFMSAdvic
     return record;
 }
 
+std::vector<NormalizedPaymentRecord> FinanceAdapter::ingest_from_file(const std::string& pfms_file_path) {
+    std::vector<NormalizedPaymentRecord> results;
+    utils::JsonValue root = utils::JsonValue::parse_file(pfms_file_path);
+
+    const auto& advices = root["advices"];
+    for (size_t i = 0; i < advices.size(); ++i) {
+        const auto& a = advices[i];
+        RawPFMSAdvice raw;
+        raw.sanction_order_no = a["sanction_order_no"].as_string();
+        raw.payment_mandate_id = a["payment_mandate_id"].as_string();
+        raw.parcel_id = a["parcel_id"].as_int();
+        raw.claimant_token = a["claimant_token"].as_string();
+        raw.gross_amount_inr = a["gross_amount_inr"].as_double();
+        raw.solatium_amount_inr = a["solatium_amount_inr"].as_double();
+        raw.interest_amount_inr = a["interest_amount_inr"].as_double();
+        raw.net_payable_inr = a["net_payable_inr"].as_double();
+        raw.bank_utr_reference = a["bank_utr_reference"].as_string();
+        raw.credit_status = a["credit_status"].as_string();
+        raw.error_code = a["error_code"].as_string();
+        raw.settlement_date = a["settlement_date"].as_string();
+
+        results.push_back(ingest_payment_advice(raw));
+    }
+
+    return results;
+}
+
 } // namespace adapters
 } // namespace dharti
+

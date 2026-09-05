@@ -60,6 +60,17 @@ public:
     void register_parcel(const models::ParcelVersion& parcel, double chainage_start, double chainage_end);
 
     /**
+     * @brief Ingest an entire real project package dynamically from real user data files.
+     */
+    void ingest_project_package(
+        const std::string& project_file,
+        const std::string& ror_file,
+        const std::string& cadastral_file,
+        const std::string& court_file,
+        const std::string& pfms_file
+    );
+
+    /**
      * @brief Advance parcel through statutory stages with invariant gating.
      */
     StageGateResult advance_to_awarded(int64_t parcel_id);

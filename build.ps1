@@ -1,9 +1,13 @@
-# PowerShell Build and Test script for DHARTI C++ Core
+# PowerShell Build and Test script for DHARTI C++ Core & CLI
 $ErrorActionPreference = "Stop"
 
 $compiler = Get-Command g++ -ErrorAction SilentlyContinue
 if (-not $compiler) {
     Write-Error "g++ compiler not found in PATH."
+}
+
+if (-not (Test-Path "bin")) {
+    New-Item -ItemType Directory -Path "bin" | Out-Null
 }
 
 $cxxFlags = @("-O3", "-std=c++17", "-Wall", "-Wextra", "-static", "-static-libgcc", "-static-libstdc++", "-Iinclude", "-Isrc/native")
@@ -30,7 +34,17 @@ Write-Host "==> Compiling DHARTI C++ Test Runner (tests/cpp/test_dharti_core.exe
 $testSources = @("tests/cpp/test_main.cpp") + $sources
 & g++ $cxxFlags -o tests/cpp/test_dharti_core.exe $testSources
 
+Write-Host "==> Compiling DHARTI Generalized CLI (bin/dharti_cli.exe)..." -ForegroundColor Cyan
+$cliSources = @("src/cli/main.cpp") + $sources
+& g++ $cxxFlags -o bin/dharti_cli.exe $cliSources
+
 Write-Host "==> Executing DHARTI C++ Test Suite..." -ForegroundColor Green
 & .\tests\cpp\test_dharti_core.exe
 
-Write-Host "==> DHARTI C++ Build & Verification SUCCESSFUL!" -ForegroundColor Green
+Write-Host "==> Executing DHARTI CLI on Real Data Assets..." -ForegroundColor Green
+& .\bin\dharti_cli.exe
+
+Write-Host "==> Executing Real Wall-Clock Performance Benchmark..." -ForegroundColor Green
+& .\bin\dharti_cli.exe --benchmark 1000
+
+Write-Host "==> DHARTI C++ Build, Realtime CLI & Verification SUCCESSFUL!" -ForegroundColor Green

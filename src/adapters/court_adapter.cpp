@@ -1,4 +1,5 @@
 #include "dharti/adapters/court_adapter.hpp"
+#include "dharti/utils/json.hpp"
 #include <sstream>
 
 namespace dharti {
@@ -61,5 +62,35 @@ bool CourtAdapter::is_stay_active(const NormalizedCourtRecord& record) const {
     return !record.metadata.is_quarantined && record.has_active_stay;
 }
 
+std::vector<NormalizedCourtRecord> CourtAdapter::ingest_from_file(const std::string& court_file_path) {
+    std::vector<NormalizedCourtRecord> results;
+    utils::JsonValue root = utils::JsonValue::parse_file(court_file_path);
+
+    std::string default_forum = root["court_jurisdiction"].as_string("High Court of Karnataka");
+    const auto& dockets = root["dockets"];
+
+    for (size_t i = 0; i < dockets.size(); ++i) {
+        const auto& d = dockets[i];
+        RawCourtDocket raw;
+        raw.court_forum = d["court_forum"].as_string(default_forum);
+        raw.case_type = d["case_type"].as_string();
+        raw.case_number = d["case_number"].as_string();
+        raw.case_year = static_cast<int32_t>(d["case_year"].as_int(2023));
+        raw.petitioner = d["petitioner"].as_string();
+        raw.respondent = d["respondent"].as_string();
+        raw.target_khasra_code = d["target_khasra_code"].as_string();
+        raw.is_stay_granted = d["is_stay_granted"].as_bool();
+        raw.stay_nature = d["stay_nature"].as_string();
+        raw.order_date = d["order_date"].as_string();
+        raw.is_stay_vacated = d["is_stay_vacated"].as_bool();
+        raw.vacate_date = d["vacate_date"].as_string();
+
+        results.push_back(ingest_docket(raw));
+    }
+
+    return results;
+}
+
 } // namespace adapters
 } // namespace dharti
+

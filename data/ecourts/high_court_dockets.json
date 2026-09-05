@@ -1,0 +1,38 @@
+{
+  "source_system": "ECOURTS_CIS_KARNATAKA",
+  "court_jurisdiction": "High Court of Karnataka at Bengaluru",
+  "dockets": [
+    {
+      "cnr_number": "KABC010040212023",
+      "court_forum": "High Court of Karnataka at Bengaluru",
+      "case_type": "Writ Petition (Civil)",
+      "case_number": "4021",
+      "case_year": 2023,
+      "target_khasra_code": "KA/Bengaluru Rural/Kundana/118/2A",
+      "petitioner": "Suresh Kumar S/o Late Venkataswamy",
+      "respondent": "Special Land Acquisition Officer (CALA) NHAI & Ramesh Kumar",
+      "is_stay_granted": true,
+      "stay_nature": "Ex-Parte Status Quo Injunction on Physical Possession",
+      "order_date": "2023-04-12",
+      "is_stay_vacated": false,
+      "vacate_date": "",
+      "order_summary": "Respondents restrained from taking physical possession of Sy No. 118/2A pending verification of succession deed."
+    },
+    {
+      "cnr_number": "KABC010040212023-VACATE",
+      "court_forum": "High Court of Karnataka at Bengaluru",
+      "case_type": "Interlocutory Application (IA No. 3/2026 in WP 4021/2023)",
+      "case_number": "IA-3-WP-4021",
+      "case_year": 2026,
+      "target_khasra_code": "KA/Bengaluru Rural/Kundana/118/2A",
+      "petitioner": "NHAI & Special Land Acquisition Officer",
+      "respondent": "Suresh Kumar & Ramesh Kumar",
+      "is_stay_granted": true,
+      "stay_nature": "Injunction Vacated",
+      "order_date": "2023-04-12",
+      "is_stay_vacated": true,
+      "vacate_date": "2026-09-03",
+      "order_summary": "Stay vacated upon CALA undertaking to deposit disputed compensation share before the Principal District Court / LARRA under Section 3H(4)."
+    }
+  ]
+}

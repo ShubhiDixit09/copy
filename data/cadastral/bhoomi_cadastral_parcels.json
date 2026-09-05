@@ -1,0 +1,72 @@
+{
+  "source_system": "BHOOMI_CADASTRAL_GIS",
+  "state_code": "KA",
+  "crs": "EPSG:4326",
+  "parcels": [
+    {
+      "parcel_id": 101,
+      "ulpin": "29010041800101",
+      "district": "Bengaluru Rural",
+      "taluk": "Devanahalli",
+      "village": "Kundana",
+      "survey_number": "116",
+      "sub_division": "1",
+      "chainage_start_km": 0.0,
+      "chainage_end_km": 3.0,
+      "polygon_area_sqm": 30050.0,
+      "boundary_wkt": "POLYGON((77.6812 13.2410, 77.7089 13.2435, 77.7092 13.2415, 77.6815 13.2390, 77.6812 13.2410))"
+    },
+    {
+      "parcel_id": 102,
+      "ulpin": "29010041800102",
+      "district": "Bengaluru Rural",
+      "taluk": "Devanahalli",
+      "village": "Kundana",
+      "survey_number": "117",
+      "sub_division": "3B",
+      "chainage_start_km": 3.0,
+      "chainage_end_km": 5.0,
+      "polygon_area_sqm": 20020.0,
+      "boundary_wkt": "POLYGON((77.7089 13.2435, 77.7274 13.2452, 77.7276 13.2432, 77.7092 13.2415, 77.7089 13.2435))"
+    },
+    {
+      "parcel_id": 118,
+      "ulpin": "29010041800118",
+      "district": "Bengaluru Rural",
+      "taluk": "Devanahalli",
+      "village": "Kundana",
+      "survey_number": "118",
+      "sub_division": "2A",
+      "chainage_start_km": 5.0,
+      "chainage_end_km": 6.5,
+      "polygon_area_sqm": 17250.0,
+      "boundary_wkt": "POLYGON((77.7274 13.2452, 77.7412 13.2465, 77.7415 13.2445, 77.7276 13.2432, 77.7274 13.2452))"
+    },
+    {
+      "parcel_id": 104,
+      "ulpin": "29010041800104",
+      "district": "Bengaluru Rural",
+      "taluk": "Devanahalli",
+      "village": "Kundana",
+      "survey_number": "119",
+      "sub_division": "1",
+      "chainage_start_km": 6.5,
+      "chainage_end_km": 10.0,
+      "polygon_area_sqm": 35080.0,
+      "boundary_wkt": "POLYGON((77.7412 13.2465, 77.7735 13.2495, 77.7738 13.2475, 77.7415 13.2445, 77.7412 13.2465))"
+    },
+    {
+      "parcel_id": 105,
+      "ulpin": "29010041800105",
+      "district": "Bengaluru Rural",
+      "taluk": "Devanahalli",
+      "village": "Kundana",
+      "survey_number": "120",
+      "sub_division": "4",
+      "chainage_start_km": 10.0,
+      "chainage_end_km": 12.0,
+      "polygon_area_sqm": 20040.0,
+      "boundary_wkt": "POLYGON((77.7735 13.2495, 77.7920 13.2512, 77.7923 13.2492, 77.7738 13.2475, 77.7735 13.2495))"
+    }
+  ]
+}

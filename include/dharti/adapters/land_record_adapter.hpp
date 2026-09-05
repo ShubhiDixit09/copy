@@ -82,6 +82,14 @@ public:
     );
 
     /**
+     * @brief Ingest and harmonize datasets directly from real JSON files.
+     */
+    std::vector<NormalizedLandRecord> ingest_from_files(
+        const std::string& ror_file_path,
+        const std::string& cadastral_file_path
+    );
+
+    /**
      * @brief Retrieve count of successfully ingested records.
      */
     size_t successful_ingestions() const { return success_count_; }

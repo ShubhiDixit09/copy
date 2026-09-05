@@ -1,4 +1,5 @@
 #include "dharti/services/sia_inclusion_engine.hpp"
+#include "dharti/utils/json.hpp"
 
 namespace dharti {
 namespace services {
@@ -74,5 +75,28 @@ std::vector<models::ContradictionCase> SIAInclusionEngine::generate_exception_ca
     return cases;
 }
 
+std::vector<models::Household> SIAInclusionEngine::ingest_from_file(const std::string& sia_file_path) const {
+    std::vector<models::Household> universe;
+    utils::JsonValue root = utils::JsonValue::parse_file(sia_file_path);
+
+    const auto& households = root["households"];
+    for (size_t i = 0; i < households.size(); ++i) {
+        const auto& h = households[i];
+        models::Household hh;
+        hh.household_id = h["household_id"].as_string();
+        hh.category = h["category"].as_string();
+        hh.family_member_count = static_cast<int>(h["family_member_count"].as_int(1));
+        hh.is_vulnerable = h["is_vulnerable"].as_bool();
+        hh.has_award_mapping = h["has_award_mapping"].as_bool();
+        hh.has_rnr_mapping = h["has_rnr_mapping"].as_bool();
+        hh.is_reviewed_ineligible = h["is_reviewed_ineligible"].as_bool();
+
+        universe.push_back(hh);
+    }
+
+    return universe;
+}
+
 } // namespace services
 } // namespace dharti
+
