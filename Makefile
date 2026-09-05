@@ -12,7 +12,13 @@ SOURCES = \
 	src/native/pci_engine.cpp \
 	src/native/contradiction_engine.cpp \
 	src/native/sia_inclusion_engine.cpp \
-	src/native/dharti_c_api.cpp
+	src/native/dharti_c_api.cpp \
+	src/adapters/land_record_adapter.cpp \
+	src/adapters/court_adapter.cpp \
+	src/adapters/finance_adapter.cpp \
+	src/core/event_store.cpp \
+	src/services/payment_reconciler.cpp \
+	src/services/workflow_coordinator.cpp
 
 TEST_SOURCES = tests/cpp/test_main.cpp $(SOURCES)
 

@@ -29,14 +29,16 @@ inline const char* payment_state_to_string(PaymentState s) {
 
 struct PaymentRecord {
     std::string payment_id;
-    int parcel_id;
+    int parcel_id{0};
     std::string beneficiary_id;
-    double amount_inr;
-    PaymentState state;
+    double amount_inr{0.0};
+    double disbursed_amount{0.0};
+    PaymentState state{PaymentState::OBLIGATION_CREATED};
     std::string sanction_order;
     std::string pfms_reference;
-    bool bank_ack_received;
-    bool receipt_or_court_deposit_confirmed;
+    std::string bank_utr;
+    bool bank_ack_received{false};
+    bool receipt_or_court_deposit_confirmed{false};
     std::string failure_reason;
 };
 

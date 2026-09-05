@@ -2,15 +2,26 @@
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
+#include <memory>
+#include <vector>
+#include <string>
 
 #include "dharti/config/settings.hpp"
 #include "dharti/utils/logger.hpp"
 #include "dharti/models/parcel.hpp"
 #include "dharti/models/claimant.hpp"
 #include "dharti/models/payment.hpp"
+#include "dharti/models/contradiction.hpp"
 #include "dharti/services/contradiction_engine.hpp"
 #include "dharti/services/sia_inclusion_engine.hpp"
 #include "dharti/services/pci_engine.hpp"
+#include "dharti/adapters/adapter_interface.hpp"
+#include "dharti/adapters/land_record_adapter.hpp"
+#include "dharti/adapters/court_adapter.hpp"
+#include "dharti/adapters/finance_adapter.hpp"
+#include "dharti/core/event_store.hpp"
+#include "dharti/services/payment_reconciler.hpp"
+#include "dharti/services/workflow_coordinator.hpp"
 
 using namespace dharti;
 
@@ -137,10 +148,331 @@ void test_pci_engine() {
     std::cout << "[PASS] C++ PCI Engine & Unlock Simulation test passed (P-118 yields +5.0 km continuous frontage)." << std::endl;
 }
 
+void test_federated_adapters() {
+    // 1. Land Record Adapter
+    adapters::LandRecordAdapter land_adapter("KA");
+    adapters::RawRoRRecord ror;
+    ror.state_code = "KA";
+    ror.district = "Bengaluru Rural";
+    ror.taluk = "Devanahalli";
+    ror.village = "Kundana";
+    ror.survey_number = "118";
+    ror.sub_division = "2A";
+    ror.owner_name = "Ramesh Kumar";
+    ror.ror_area_sqm = 10000.0;
+    ror.tenure_type = "Patta";
+    ror.has_encumbrance = false;
+
+    adapters::RawCadastralRecord cadastral;
+    cadastral.survey_number = "118";
+    cadastral.sub_division = "2A";
+    cadastral.polygon_area_sqm = 10020.0;
+    cadastral.chainage_start_km = 5.0;
+    cadastral.chainage_end_km = 6.5;
+
+    auto normalized_land = land_adapter.ingest_and_harmonize(ror, cadastral, 118);
+    assert(!normalized_land.metadata.is_quarantined);
+    assert(normalized_land.parcel_id == 118);
+    assert(!normalized_land.metadata.payload_checksum.empty());
+    assert(land_adapter.successful_ingestions() == 1);
+
+    // 2. Court Adapter
+    adapters::CourtAdapter court_adapter("KARNATAKA_HC");
+    adapters::RawCourtDocket docket;
+    docket.court_forum = "High Court of Karnataka";
+    docket.case_type = "Writ Petition";
+    docket.case_number = "4021";
+    docket.case_year = 2023;
+    docket.petitioner = "Suresh Kumar";
+    docket.respondent = "State of Karnataka & NHAI";
+    docket.target_khasra_code = normalized_land.canonical_khasra_code;
+    docket.is_stay_granted = true;
+    docket.stay_nature = "PossessionInjunction";
+    docket.order_date = "2023-04-12";
+    docket.is_stay_vacated = false;
+
+    auto court_rec = court_adapter.ingest_docket(docket);
+    assert(!court_rec.metadata.is_quarantined);
+    assert(court_adapter.is_stay_active(court_rec));
+    assert(court_adapter.active_stays_tracked() == 1);
+
+    // 3. Finance Adapter
+    adapters::FinanceAdapter finance_adapter("PFMS_DIRECT");
+    adapters::RawPFMSAdvice advice;
+    advice.sanction_order_no = "SO-2026-8819";
+    advice.payment_mandate_id = "MANDATE-118-A";
+    advice.parcel_id = 118;
+    advice.claimant_token = "CLAIMANT-TOK-88912";
+    advice.net_payable_inr = 4500000.0;
+    advice.bank_utr_reference = "SBIN2026090100418";
+    advice.credit_status = "SUCCESS";
+    advice.settlement_date = "2026-09-01T14:22:00Z";
+
+    auto pmt_rec = finance_adapter.ingest_payment_advice(advice);
+    assert(!pmt_rec.metadata.is_quarantined);
+    assert(pmt_rec.is_settled);
+    assert(pmt_rec.net_amount_inr == 4500000.0);
+    assert(finance_adapter.successful_disbursements() == 1);
+
+    std::cout << "[PASS] C++ Federated Adapters test passed (LandRecord, Court, Finance)." << std::endl;
+}
+
+void test_event_store_and_bitemporal_audit() {
+    core::BitemporalEventStore store;
+
+    core::BitemporalEvent ev1;
+    ev1.event_id = "EV-001";
+    ev1.aggregate_type = "Parcel";
+    ev1.aggregate_id = "P-118";
+    ev1.event_type = "PARCEL_INGESTED";
+    ev1.payload_data = "RoR and Cadastral Polygon Linked";
+    ev1.valid_time = "2026-08-15T09:00:00Z";
+    ev1.transaction_time = "2026-08-15T09:05:00Z";
+    ev1.recorded_by = "INGESTION_BOT";
+
+    core::BitemporalEvent ev2;
+    ev2.event_id = "EV-002";
+    ev2.aggregate_type = "Parcel";
+    ev2.aggregate_id = "P-118";
+    ev2.event_type = "INJUNCTION_IMPOSED";
+    ev2.payload_data = "WP 4021/2023 stay order recorded";
+    ev2.valid_time = "2026-08-18T11:00:00Z";
+    ev2.transaction_time = "2026-08-18T11:10:00Z";
+    ev2.recorded_by = "LEGAL_CELL";
+
+    uint64_t seq1 = store.append_event(ev1);
+    uint64_t seq2 = store.append_event(ev2);
+
+    assert(seq1 == 1);
+    assert(seq2 == 2);
+    assert(store.event_count() == 2);
+    assert(store.verify_ledger_integrity());
+
+    // Historical transaction time query
+    auto historical_t = store.query_transaction_as_of("2026-08-16T00:00:00Z");
+    assert(historical_t.size() == 1);
+    assert(historical_t[0].event_id == "EV-001");
+
+    auto aggregate_events = store.get_events_for_aggregate("Parcel", "P-118");
+    assert(aggregate_events.size() == 2);
+
+    std::cout << "[PASS] C++ Bitemporal Event Store test passed (Unbroken hash chain, Tt/Tv queryable)." << std::endl;
+}
+
+void test_payment_reconciliation() {
+    services::PaymentReconciler reconciler;
+
+    models::PaymentRecord obligation;
+    obligation.payment_id = "MANDATE-118-A";
+    obligation.parcel_id = 118;
+    obligation.amount_inr = 4500000.0;
+    obligation.state = models::PaymentState::OBLIGATION_CREATED;
+    reconciler.register_obligation(obligation);
+
+    assert(!reconciler.is_parcel_financially_cleared(118));
+
+    // Process bank rejection first
+    adapters::NormalizedPaymentRecord failed_advice;
+    failed_advice.mandate_id = "MANDATE-118-A";
+    failed_advice.parcel_id = 118;
+    failed_advice.net_amount_inr = 4500000.0;
+    failed_advice.is_settled = false;
+    failed_advice.is_failed = true;
+    failed_advice.rejection_reason = "ERR_ACCOUNT_FROZEN";
+
+    reconciler.reconcile_advice(failed_advice);
+    assert(!reconciler.is_parcel_financially_cleared(118));
+    auto summary = reconciler.get_parcel_summary(118);
+    assert(summary.has_failed_transactions);
+
+    // Now re-issue and settle
+    adapters::NormalizedPaymentRecord success_advice;
+    success_advice.mandate_id = "MANDATE-118-A";
+    success_advice.parcel_id = 118;
+    success_advice.net_amount_inr = 4500000.0;
+    success_advice.bank_utr = "SBIN2026090100418";
+    success_advice.is_settled = true;
+    success_advice.is_failed = false;
+
+    reconciler.reconcile_advice(success_advice);
+    assert(reconciler.is_parcel_financially_cleared(118));
+    assert(reconciler.confirmed_receipts() == 1);
+
+    std::cout << "[PASS] C++ Payment Reconciler test passed (Rejection handled & settlement verified)." << std::endl;
+}
+
+void test_sih26016_complete_demo_walkthrough() {
+    std::cout << "\n>>> EXECUTING SIH 26016 4-MINUTE COMPLETE DEMO WALKTHROUGH <<<" << std::endl;
+
+    auto event_store = std::make_shared<core::BitemporalEventStore>();
+    auto contradiction_engine = std::make_shared<services::ContradictionEngine>(1.0);
+    auto sia_engine = std::make_shared<services::SIAInclusionEngine>();
+    auto payment_reconciler = std::make_shared<services::PaymentReconciler>();
+    auto pci_engine = std::make_shared<services::PCIEngine>();
+
+    services::WorkflowCoordinator coordinator(
+        event_store,
+        contradiction_engine,
+        sia_engine,
+        payment_reconciler,
+        pci_engine
+    );
+
+    const double CORRIDOR_LENGTH_KM = 12.0;
+
+    // Register 5 Corridor Parcels (P-101, P-102, P-118, P-104, P-105)
+    models::ParcelVersion p101;
+    p101.parcel_id = 101;
+    p101.ror_area_sqm = 1000.0;
+    p101.cadastral_area_sqm = 1002.0;
+    p101.ror_owner = "Farmer A";
+    p101.field_claimant = "Farmer A";
+    p101.has_active_stay = false;
+
+    models::ParcelVersion p102;
+    p102.parcel_id = 102;
+    p102.ror_area_sqm = 1000.0;
+    p102.cadastral_area_sqm = 1001.0;
+    p102.ror_owner = "Farmer B";
+    p102.field_claimant = "Farmer B";
+    p102.has_active_stay = false;
+
+    models::ParcelVersion p118;
+    p118.parcel_id = 118;
+    p118.ror_area_sqm = 1000.0;
+    p118.cadastral_area_sqm = 1150.0; // 15% discrepancy
+    p118.ror_owner = "Ramesh Kumar";
+    p118.field_claimant = "Suresh Kumar"; // Title mismatch
+    p118.has_active_stay = true; // Court Injunction Bottleneck!
+
+    models::ParcelVersion p104;
+    p104.parcel_id = 104;
+    p104.ror_area_sqm = 1000.0;
+    p104.cadastral_area_sqm = 1004.0;
+    p104.ror_owner = "Farmer D";
+    p104.field_claimant = "Farmer D";
+    p104.has_active_stay = false;
+
+    models::ParcelVersion p105;
+    p105.parcel_id = 105;
+    p105.ror_area_sqm = 1000.0;
+    p105.cadastral_area_sqm = 1003.0;
+    p105.ror_owner = "Farmer E";
+    p105.field_claimant = "Farmer E";
+    p105.has_active_stay = false;
+
+    coordinator.register_parcel(p101, 0.0, 3.0);
+    coordinator.register_parcel(p102, 3.0, 5.0);
+    coordinator.register_parcel(p118, 5.0, 6.5);
+    coordinator.register_parcel(p104, 6.5, 10.0);
+    coordinator.register_parcel(p105, 10.0, 12.0);
+
+    // Setup obligations and advance P-101, P-102, P-104 to CONSTRUCTION_READY
+    for (int64_t pid : {101, 102, 104}) {
+        models::PaymentRecord pmt;
+        pmt.payment_id = "PMT-" + std::to_string(pid);
+        pmt.parcel_id = pid;
+        pmt.amount_inr = 2000000.0;
+        payment_reconciler->register_obligation(pmt);
+
+        adapters::NormalizedPaymentRecord adv;
+        adv.mandate_id = pmt.payment_id;
+        adv.parcel_id = pid;
+        adv.net_amount_inr = 2000000.0;
+        adv.bank_utr = "UTR-" + std::to_string(pid);
+        adv.is_settled = true;
+        payment_reconciler->reconcile_advice(adv);
+
+        coordinator.advance_to_awarded(pid);
+        coordinator.advance_to_possession_verified(pid, "MEMO-FIELD-" + std::to_string(pid));
+        auto rdy_res = coordinator.advance_to_construction_ready(pid);
+        assert(rdy_res.is_cleared);
+    }
+
+    // Step 1: Baseline Corridor Evaluation
+    auto initial_pci = coordinator.evaluate_corridor_pci(CORRIDOR_LENGTH_KM);
+    std::cout << "[Step 1 Baseline] Total Ready: " << initial_pci.total_ready_length << " km, "
+              << "Max Continuous Frontage: " << initial_pci.max_continuous_ready_length << " km, "
+              << "Verified PCI: " << (initial_pci.pci * 100.0) << "%" << std::endl;
+    assert(std::abs(initial_pci.max_continuous_ready_length - 5.0) < 1e-6);
+
+    // Step 2: Bottleneck Unlock Simulation
+    auto priorities = coordinator.identify_unlock_priorities(CORRIDOR_LENGTH_KM, 5);
+    assert(!priorities.empty());
+    assert(priorities[0].parcel_id == 118);
+    std::cout << "[Step 2 Unlock Priority] #1 Priority Parcel: P-" << priorities[0].parcel_id
+              << " | Current Contiguous: " << priorities[0].current_max_run << " km"
+              << " -> Simulated Unlock: " << priorities[0].simulated_max_run << " km"
+              << " (+ " << priorities[0].unlock_gain << " km continuous frontage gain!)" << std::endl;
+
+    // Step 3: Attempt Premature Handover of P-118 (Must Fail due to Invariants)
+    auto blocked_attempt = coordinator.advance_to_possession_verified(118, "PREMATURE_MEMO");
+    assert(!blocked_attempt.is_cleared);
+    std::cout << "[Step 3 Invariant-3 Defense] Handover correctly blocked: "
+              << blocked_attempt.rejection_reason << std::endl;
+
+    // Step 4: Multi-Dimensional Exception Resolution on P-118
+    std::cout << "[Step 4 Multi-Agency Resolution] Resolving P-118 exceptions..." << std::endl;
+    
+    // 4a. Judicial Stay Vacated via Court order
+    coordinator.resolve_court_stay(118, "WP-4021-VACATE-ORDER-2026");
+    
+    // 4b. Title Succession Dispute Resolved
+    coordinator.resolve_title_mismatch(118, "Ramesh Kumar");
+
+    // 4c. Cadastral Survey Area Harmonized via Joint Measurement Survey (JMS)
+    coordinator.harmonize_cadastral_survey(118, 1005.0);
+
+    // 4d. Financial Compensation Disbursed and Confirmed
+    models::PaymentRecord pmt118;
+    pmt118.payment_id = "PMT-118";
+    pmt118.parcel_id = 118;
+    pmt118.amount_inr = 4500000.0;
+    payment_reconciler->register_obligation(pmt118);
+
+    adapters::NormalizedPaymentRecord adv118;
+    adv118.mandate_id = "PMT-118";
+    adv118.parcel_id = 118;
+    adv118.net_amount_inr = 4500000.0;
+    adv118.bank_utr = "SBIN-CLR-118-FINAL";
+    adv118.is_settled = true;
+    payment_reconciler->reconcile_advice(adv118);
+
+    // 4e. Advance P-118 through Statutory Gated Workflow
+    auto awd_res = coordinator.advance_to_awarded(118);
+    assert(awd_res.is_cleared);
+
+    auto poss_res = coordinator.advance_to_possession_verified(118, "GEO-TAGGED-MEMO-P118-COLLECTOR-SIGNED");
+    assert(poss_res.is_cleared);
+
+    auto rdy_res = coordinator.advance_to_construction_ready(118);
+    assert(rdy_res.is_cleared);
+    std::cout << "[Step 4 Resolution Success] Parcel P-118 is now ConstructionReady!" << std::endl;
+
+    // Step 5: Post-Resolution Corridor Recalculation
+    auto final_pci = coordinator.evaluate_corridor_pci(CORRIDOR_LENGTH_KM);
+    std::cout << "[Step 5 Post-Resolution PCI] Max Continuous Frontage: "
+              << final_pci.max_continuous_ready_length << " km "
+              << "(JUMPED from 5.0 km to 10.0 km continuous frontage!)" << std::endl;
+    std::cout << "[Step 5 Post-Resolution PCI] Verified Corridor PCI: "
+              << (final_pci.pci * 100.0) << "%" << std::endl;
+
+    assert(std::abs(final_pci.max_continuous_ready_length - 10.0) < 1e-6);
+    assert(std::abs(final_pci.pci - (10.0 / 12.0)) < 1e-6);
+
+    // Step 6: Verify Immutable Bitemporal Audit Trail
+    assert(event_store->verify_ledger_integrity());
+    std::cout << "[Step 6 Audit Trail] Bitemporal Event Log contains "
+              << event_store->event_count() << " cryptographically chained events (100% verified)." << std::endl;
+
+    std::cout << ">>> SIH 26016 COMPLETE DEMO WALKTHROUGH FINISHED SUCCESSFULLY <<<\n" << std::endl;
+}
+
 int main() {
-    std::cout << "========================================" << std::endl;
-    std::cout << "   DHARTI Pure C++ Domain Test Suite   " << std::endl;
-    std::cout << "========================================" << std::endl;
+    std::cout << "=================================================" << std::endl;
+    std::cout << "   DHARTI National Land Acquisition Control Plane" << std::endl;
+    std::cout << "          Pure C++ Domain & Workflow Suite       " << std::endl;
+    std::cout << "=================================================" << std::endl;
 
     test_config();
     test_logger();
@@ -148,9 +480,13 @@ int main() {
     test_contradiction_engine();
     test_sia_inclusion_engine();
     test_pci_engine();
+    test_federated_adapters();
+    test_event_store_and_bitemporal_audit();
+    test_payment_reconciliation();
+    test_sih26016_complete_demo_walkthrough();
 
-    std::cout << "========================================" << std::endl;
-    std::cout << "   ALL C++ TESTS PASSED (100% GREEN)   " << std::endl;
-    std::cout << "========================================" << std::endl;
+    std::cout << "=================================================" << std::endl;
+    std::cout << "   ALL C++ TESTS & DEMO SCENARIOS PASSED (100%)  " << std::endl;
+    std::cout << "=================================================" << std::endl;
     return 0;
 }
