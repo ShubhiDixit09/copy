@@ -216,6 +216,13 @@ The primary metric of DHARTI is **verified continuous constructible frontage**, 
    $$\text{PCI} = \frac{L_{\text{continuous}}^{\max}}{L_{\text{total alignment}}}$$
 5. **Unlock Simulation**: For each blocked parcel $p$, simulate flipping $\text{ready}(p) = \text{True}$. Compute $\Delta L_{\text{continuous}}^{\max}(p)$. Rank parcels by $\Delta L_{\text{continuous}}^{\max}(p)$ to direct Collector/LAA focus to the parcel with highest operational unlock value.
 
+#### 7.1.1 High-Performance C++ Native Engine
+- For large-scale national corridors spanning hundreds of kilometers and tens of thousands of cadastral parcels, the interval merging and exhaustive $O(N)$ unlock simulation must achieve sub-millisecond latency.
+- Performance-critical mathematical and geometric routines are implemented in **modern C++ (C++17/C++20)** within `src/native/` and exposed via an `extern "C"` ABI.
+- The platform provides dual-mode execution:
+  - **Native C++ Engine**: High-throughput vectorized computation via dynamic library bindings.
+  - **Python Fallback Engine**: Pure Python implementation ensuring 100% testability and portability across environments without native toolchains.
+
 ### 7.2 Evidence Confidence & Contradiction Engine
 Detects deterministic discrepancies across authoritative records:
 - **Title Mismatch**: RoR registered owner $\ne$ field survey claimant.
