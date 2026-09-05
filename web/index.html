@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DHARTI - National Land Acquisition Control Plane & Management System</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Leaflet GIS CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <!-- Light Theme Design System -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Top Government Bar -->
+  <header class="gov-top-bar">
+    <div class="gov-emblem-badge">
+      <span>भारत सरकार | GOVERNMENT OF INDIA</span>
+    </div>
+    <div class="gov-meta-info">
+      <span>Ministry of Road Transport & Highways | National Highways Authority of India (NHAI)</span>
+    </div>
+  </header>
+
+  <!-- Main System Header -->
+  <div class="main-header">
+    <div class="header-inner">
+      <div class="brand-section">
+        <div class="brand-logo-icon">ध</div>
+        <div>
+          <h1 class="brand-title">DHARTI</h1>
+          <p class="brand-subtitle">Evidence-Backed National Land Acquisition Control Plane (SIH 26016)</p>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <div class="role-badge-selector">
+          <span>Viewing As:</span>
+          <select id="user-role-select" class="role-select">
+            <option value="cala">CALA / Competent Authority (Devanahalli)</option>
+            <option value="ministry">Central Ministry / MoRTH</option>
+            <option value="state">State Revenue Department (Karnataka)</option>
+            <option value="piu">Project Director (NHAI PIU)</option>
+            <option value="auditor">CAG / Statutory Auditor</option>
+          </select>
+        </div>
+
+        <div class="status-pill-live">
+          <span class="status-dot"></span>
+          <span>C++17 Engine Active</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation Tabs -->
+  <nav class="nav-tab-container">
+    <button class="nav-tab-btn active" data-tab="cockpit">
+      <span>Executive Cockpit & GIS Map</span>
+    </button>
+    <button class="nav-tab-btn" data-tab="sandbox">
+      <span>Manual Testing Sandbox</span>
+    </button>
+    <button class="nav-tab-btn" data-tab="pci">
+      <span>Bottleneck Unlock Simulator</span>
+    </button>
+    <button class="nav-tab-btn" data-tab="clocks">
+      <span>Statutory Clocks & SLAs</span>
+    </button>
+    <button class="nav-tab-btn" data-tab="custom-data">
+      <span>Custom Dataset Ingestion</span>
+    </button>
+    <button class="nav-tab-btn" data-tab="mis">
+      <span>Executive MIS Report</span>
+    </button>
+  </nav>
+
+  <!-- Application Body -->
+  <main class="app-container">
+
+    <!-- KPI Summary Grid (8 Key Parameters) -->
+    <section class="kpi-grid-container" aria-label="Key Land Acquisition Parameters">
+      <div class="kpi-card">
+        <div class="kpi-header">Corridor Length</div>
+        <div class="kpi-value" id="kpi-corridor-km">12.0 km</div>
+        <div class="kpi-sub">NE-7 Pkg IV (Bengaluru-Chennai)</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">Continuous Frontage (PCI)</div>
+        <div class="kpi-value text-primary" id="kpi-pci-val">41.67%</div>
+        <div class="kpi-sub" id="kpi-frontage-km">5.0 km Max Run</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">Area Notified (Ha)</div>
+        <div class="kpi-value" id="kpi-area-notified">12.24 Ha</div>
+        <div class="kpi-sub">Gazette S.O. 2418(E)</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">Parcels Handed Over</div>
+        <div class="kpi-value" id="kpi-parcels-ready">3 / 5</div>
+        <div class="kpi-sub">Construction Ready</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">Compensation Disbursed</div>
+        <div class="kpi-value text-success" id="kpi-disbursed-inr">₹12.60 Cr</div>
+        <div class="kpi-sub">Sanctioned: <span id="kpi-sanctioned-inr">₹20.25 Cr</span></div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">Active Court Stays</div>
+        <div class="kpi-value text-danger" id="kpi-stays-count">1</div>
+        <div class="kpi-sub">High Court WP 4021/2023</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">Surveyed Households</div>
+        <div class="kpi-value" id="kpi-households-count">10</div>
+        <div class="kpi-sub">SIA Census RFCTLARR Ch. II</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">R&R Entitlements</div>
+        <div class="kpi-value text-warning" id="kpi-rnr-status">60% Mapped</div>
+        <div class="kpi-sub">4 Unmapped Vulnerable</div>
+      </div>
+    </section>
+
+    <!-- TAB 1: EXECUTIVE COCKPIT & GIS MAP -->
+    <section id="panel-cockpit" class="tab-content-panel active">
+      <div class="cockpit-split-grid">
+        <!-- Left: Map & Linear Corridor -->
+        <div>
+          <div class="panel-card">
+            <div class="panel-title-bar">
+              <h2 class="panel-title">Interactive Cadastral GIS Alignment Map</h2>
+              <span class="text-muted text-sm">CRS: EPSG:4326 | Bhoomi Cadastral Vectors</span>
+            </div>
+            
+            <div id="map-canvas"></div>
+
+            <div class="corridor-strip-wrapper">
+              <div class="strip-label-row">
+                <span>Corridor Centerline Chainage (0.0 km &rarr; 12.0 km)</span>
+                <span id="pci-progress-summary">Ready Frontage: 5.0 km / 12.0 km</span>
+              </div>
+              <div class="corridor-linear-strip" id="corridor-linear-strip"></div>
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-title-bar">
+              <h2 class="panel-title">Corridor Parcel Inventory & Title Verification</h2>
+              <span class="text-muted text-sm">Click any parcel to inspect</span>
+            </div>
+            <div class="data-table-wrapper">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>P-ID</th>
+                    <th>ULPIN</th>
+                    <th>Survey No</th>
+                    <th>Chainage</th>
+                    <th>Disbursement</th>
+                    <th>State Machine</th>
+                    <th>Judicial Status</th>
+                  </tr>
+                </thead>
+                <tbody id="parcel-inventory-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Inspector Drawer & Invariant Alerts -->
+        <div>
+          <div class="panel-card">
+            <div class="panel-title-bar">
+              <h2 class="panel-title">Parcel Evidence Dossier</h2>
+            </div>
+            <div class="inspector-card">
+              <h3 id="insp-parcel-id" style="font-size: 1.05rem; margin-bottom: 12px; color: var(--primary);">Select a Parcel</h3>
+              
+              <div id="insp-stay-box" class="inspector-alert-stay" style="display: none;"></div>
+
+              <div class="inspector-field">
+                <label>14-Digit Bhu-Aadhaar ULPIN</label>
+                <code id="insp-ulpin">-</code>
+              </div>
+              <div class="inspector-field">
+                <label>Recorded Owner & Khata</label>
+                <span id="insp-owner">-</span>
+              </div>
+              <div class="inspector-field">
+                <label>Chainage Bounds</label>
+                <span id="insp-chainage">-</span>
+              </div>
+              <div class="inspector-field">
+                <label>State Machine Stage</label>
+                <span id="insp-state">-</span>
+              </div>
+              <div class="inspector-field">
+                <label>Area Reconciliation (Cadastral vs RoR)</label>
+                <span id="insp-area">-</span>
+              </div>
+              <div class="inspector-field">
+                <label>PFMS Compensation Status</label>
+                <span id="insp-comp">-</span>
+              </div>
+              <div class="inspector-field">
+                <label>Bank Settlement UTR</label>
+                <code id="insp-utr">-</code>
+              </div>
+              <div class="inspector-field">
+                <label>Disputes & Speaking Orders</label>
+                <span id="insp-disputes">-</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Test Actions Trigger -->
+          <div class="panel-card">
+            <div class="panel-title-bar">
+              <h2 class="panel-title">Quick Verification Triggers</h2>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 14px;">
+              Directly execute manual operational actions on the bottleneck parcel (P-118):
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <button class="btn-action btn-danger" onclick="window.testRunner.testPrematureHandover()">
+                Test Invariant-3 Handover Defense
+              </button>
+              <button class="btn-action btn-primary" onclick="window.testRunner.vacateStayAndRefresh()">
+                Vacate High Court Stay on P-118
+              </button>
+              <button class="btn-action btn-success" onclick="window.testRunner.disburseCompensationAndRefresh()">
+                Reconcile PFMS Bank Disbursement
+              </button>
+              <button class="btn-action btn-secondary" onclick="window.testRunner.completePossessionAndRefresh()">
+                Confirm Field Handover &rarr; Recalculate PCI
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: MANUAL TESTING SANDBOX -->
+    <section id="panel-sandbox" class="tab-content-panel">
+      <div class="panel-card">
+        <div class="panel-title-bar">
+          <div>
+            <h2 class="panel-title">Interactive Manual Testing Sandbox (SIH 26016 Workflow)</h2>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
+              Manually trigger and verify each multi-agency integration, invariant circuit breaker, and bottleneck resolution.
+            </p>
+          </div>
+          <button id="btn-reset-data" class="btn-action btn-secondary">Reset to Baseline</button>
+        </div>
+
+        <!-- Invariant Defense Modal / Alert Box -->
+        <div id="sandbox-invariant-alert" class="invariant-callout-box">
+          <div id="sandbox-alert-title" class="callout-title"></div>
+          <div id="sandbox-alert-body" class="callout-body"></div>
+        </div>
+
+        <div class="sandbox-action-grid">
+          <!-- Step 1 -->
+          <div class="sandbox-action-card">
+            <div>
+              <span class="sandbox-step-num">Step 1</span>
+              <h3 class="sandbox-title">Multi-Agency Validation</h3>
+              <p class="sandbox-desc">Cross-references Bhoomi RoR, Cadastral GIS, and eCourts dockets. Detects 15% area mismatch and active court injunction on P-118.</p>
+            </div>
+            <button class="btn-action btn-secondary" onclick="window.testRunner.runMultiAgencyAudit()">
+              Execute Cross-Verification
+            </button>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="sandbox-action-card">
+            <div>
+              <span class="sandbox-step-num">Step 2</span>
+              <h3 class="sandbox-title">SIA Household Inclusion</h3>
+              <p class="sandbox-desc">Audits 10 surveyed families against Section 23 award. Flags 4 unmapped tenant/laborer families and trips Invariant-4 circuit breaker.</p>
+            </div>
+            <button class="btn-action btn-secondary" onclick="window.testRunner.runSIAAudit()">
+              Audit SIA Census
+            </button>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="sandbox-action-card">
+            <div>
+              <span class="sandbox-step-num">Step 3</span>
+              <h3 class="sandbox-title">Premature Handover Defense</h3>
+              <p class="sandbox-desc">Attempts to transition disputed parcel P-118 directly to ConstructionReady. Verifies Invariant-2 and Invariant-3 enforce hard blocks.</p>
+            </div>
+            <button class="btn-action btn-danger" onclick="window.testRunner.testPrematureHandover()">
+              Attempt Premature Handover
+            </button>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="sandbox-action-card">
+            <div>
+              <span class="sandbox-step-num">Step 4</span>
+              <h3 class="sandbox-title">Vacate High Court Stay</h3>
+              <p class="sandbox-desc">Ingests eCourts Section 3H(4) deposit order, vacating ex-parte status quo injunction WP 4021/2023 on Sy 118/2A.</p>
+            </div>
+            <button class="btn-action btn-primary" onclick="window.testRunner.vacateStayAndRefresh()">
+              Vacate Court Injunction
+            </button>
+          </div>
+
+          <!-- Step 5 -->
+          <div class="sandbox-action-card">
+            <div>
+              <span class="sandbox-step-num">Step 5</span>
+              <h3 class="sandbox-title">PFMS Payment Settlement</h3>
+              <p class="sandbox-desc">Reconciles rejected payment advice. Credits ₹4.50 Cr into escrow/beneficiary account and captures Bank UTR SBIN426245890118.</p>
+            </div>
+            <button class="btn-action btn-success" onclick="window.testRunner.disburseCompensationAndRefresh()">
+              Reconcile Bank Payment
+            </button>
+          </div>
+
+          <!-- Step 6 -->
+          <div class="sandbox-action-card">
+            <div>
+              <span class="sandbox-step-num">Step 6</span>
+              <h3 class="sandbox-title">Panchnama & PCI Jump</h3>
+              <p class="sandbox-desc">Uploads geotagged field Panchnama. P-118 becomes ConstructionReady, jumping continuous corridor frontage from 5.0 km to 10.0 km (83.3% PCI)!</p>
+            </div>
+            <button class="btn-action btn-primary" onclick="window.testRunner.completePossessionAndRefresh()">
+              Authorize Handover
+            </button>
+          </div>
+        </div>
+
+        <!-- Full Automated Walkthrough Button -->
+        <div style="background: var(--primary-subtle); border: 1px solid var(--primary-border); padding: 16px; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h4 style="font-size: 0.98rem; font-weight: 700; color: var(--primary);">Automated 4-Minute Walkthrough Demo</h4>
+            <p style="font-size: 0.82rem; color: var(--text-secondary);">Executes all 6 steps sequentially with live UI state updates, demonstrating full compliance with SIH 26016 requirements.</p>
+          </div>
+          <button class="btn-action btn-primary" onclick="window.testRunner.runFullWalkthroughDemo()">
+            Execute 4-Minute Demo Walkthrough
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: BOTTLENECK UNLOCK SIMULATOR -->
+    <section id="panel-pci" class="tab-content-panel">
+      <div class="panel-card">
+        <div class="panel-title-bar">
+          <div>
+            <h2 class="panel-title">Corridor Bottleneck Unlock Simulator</h2>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
+              Ranks all blocked parcels by instantaneous continuous frontage gain (&Delta;PCI) if resolved.
+            </p>
+          </div>
+          <div>
+            <span style="font-size: 0.85rem; font-weight: 600;">Current Baseline PCI: </span>
+            <span id="sim-baseline-pci" class="text-primary font-bold">41.67%</span>
+            <span style="font-size: 0.85rem; color: var(--text-muted);"> (<span id="sim-baseline-frontage">5.0 km</span>)</span>
+          </div>
+        </div>
+
+        <div class="data-table-wrapper">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Priority Rank</th>
+                <th>Parcel & Survey No</th>
+                <th>Current State</th>
+                <th>Continuous Frontage Gain</th>
+                <th>Simulated PCI Jump</th>
+                <th>Dispute / Blocking Cause</th>
+              </tr>
+            </thead>
+            <tbody id="pci-rankings-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: STATUTORY CLOCKS & SLAS -->
+    <section id="panel-clocks" class="tab-content-panel">
+      <div class="panel-card">
+        <div class="panel-title-bar">
+          <h2 class="panel-title">Statutory Timeline Clocks & SLA Monitor (RFCTLARR & NH Act)</h2>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
+          <!-- Clock 1 -->
+          <div class="inspector-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span class="sandbox-step-num">Statutory Clock 1</span>
+              <span class="status-badge badge-PossessionConfirmed">Active</span>
+            </div>
+            <h3 style="font-size: 0.98rem; font-weight: 700; margin-bottom: 4px;">Section 19 Final Declaration Lapse</h3>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Mandatory 12-month statutory limit from Sec 11 preliminary notification.</p>
+            <div class="inspector-field">
+              <label>Time Elapsed</label>
+              <span>7 Months, 12 Days (61%)</span>
+            </div>
+            <div class="inspector-field">
+              <label>Statutory Deadline</label>
+              <span class="text-success font-semibold">142 Days Remaining (Compliant)</span>
+            </div>
+          </div>
+
+          <!-- Clock 2 -->
+          <div class="inspector-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span class="sandbox-step-num">Statutory Clock 2</span>
+              <span class="status-badge badge-AwardDeclared">Monitoring</span>
+            </div>
+            <h3 style="font-size: 0.98rem; font-weight: 700; margin-bottom: 4px;">Section 25 Award Declaration Deadline</h3>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Award must be pronounced within 12 months from Sec 19 declaration.</p>
+            <div class="inspector-field">
+              <label>Time Elapsed</label>
+              <span>4 Months, 3 Days (34%)</span>
+            </div>
+            <div class="inspector-field">
+              <label>Statutory Deadline</label>
+              <span class="text-success font-semibold">241 Days Remaining (No Delay Risk)</span>
+            </div>
+          </div>
+
+          <!-- Clock 3 -->
+          <div class="inspector-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span class="sandbox-step-num">Statutory Clock 3</span>
+              <span class="status-badge badge-InjunctionImposed">Action Required</span>
+            </div>
+            <h3 style="font-size: 0.98rem; font-weight: 700; margin-bottom: 4px;">Section 3E 60-Day Possession Notice</h3>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">Notice period for physical possession following compensation deposit.</p>
+            <div class="inspector-field">
+              <label>Notice Status on P-118</label>
+              <span class="text-danger font-semibold">Suspended by High Court Injunction</span>
+            </div>
+            <div class="inspector-field">
+              <label>Remedy Action</label>
+              <span>Deposit under Section 3H(4) to vacate stay.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: CUSTOM DATASET INGESTION -->
+    <section id="panel-custom-data" class="tab-content-panel">
+      <div class="panel-card">
+        <div class="panel-title-bar">
+          <div>
+            <h2 class="panel-title">Generalized Dataset Ingestion & Testing Sandbox</h2>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">
+              Ingest arbitrary user-defined project corridors, cadastral parcels, and compensation records to test the control plane dynamically.
+            </p>
+          </div>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">
+          Paste custom JSON matching the DHARTI corridor schema below (includes <code>parcels</code> array with chainage bounds and states):
+        </p>
+
+        <textarea id="custom-json-input" style="width: 100%; height: 260px; font-family: var(--font-mono); font-size: 0.8rem; padding: 14px; border: 1px solid var(--border-medium); border-radius: var(--radius-md); outline: none; background: #ffffff;" placeholder='{
+  "alignment_length_km": 15.0,
+  "parcels": [
+    {
+      "parcel_id": 201,
+      "ulpin": "29010041800201",
+      "survey_number": "201",
+      "sub_division": "1",
+      "chainage_start_km": 0.0,
+      "chainage_end_km": 5.0,
+      "polygon_area_sqm": 45000.0,
+      "ror_area_sqm": 45000.0,
+      "owner_name": "Custom Owner A",
+      "state": "ConstructionReady",
+      "sanctioned_amount_inr": 50000000.0,
+      "disbursed_amount_inr": 50000000.0,
+      "bank_utr": "SBIN9990001",
+      "court_stay": false,
+      "boundary_wkt": "POLYGON((77.6812 13.2410, 77.7089 13.2435, 77.7092 13.2415, 77.6815 13.2390, 77.6812 13.2410))"
+    }
+  ]
+}'></textarea>
+
+        <div style="display: flex; gap: 12px; margin-top: 14px;">
+          <button id="btn-apply-custom-json" class="btn-action btn-primary">
+            Apply Custom Dataset & Recalculate
+          </button>
+          <button class="btn-action btn-secondary" onclick="document.getElementById('custom-json-input').value = JSON.stringify({alignment_length_km: window.dataStore.project.alignment_length_km, parcels: window.dataStore.parcels}, null, 2)">
+            Load Current Live Dataset
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: EXECUTIVE MIS REPORT -->
+    <section id="panel-mis" class="tab-content-panel">
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+        <button id="btn-print-mis" class="btn-action btn-primary">
+          Print / Export Official MIS Dossier
+        </button>
+      </div>
+      <div id="mis-report-view"></div>
+    </section>
+
+  </main>
+
+  <!-- Notification Toast Container -->
+  <div id="notification-toast-container"></div>
+
+  <!-- Leaflet GIS JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Application Modules -->
+  <script src="js/data_store.js"></script>
+  <script src="js/pci_engine.js"></script>
+  <script src="js/map_view.js"></script>
+  <script src="js/test_sandbox.js"></script>
+  <script src="js/mis_reports.js"></script>
+  <script src="js/app.js"></script>
+
+  <!-- Test Runner Glue -->
+  <script>
+    class TestRunnerGlue {
+      constructor() {
+        this.sandbox = window.app.sandbox;
+      }
+
+      runMultiAgencyAudit() {
+        const res = this.sandbox.runMultiAgencyCheck();
+        const alertBox = document.getElementById("sandbox-invariant-alert");
+        const titleEl = document.getElementById("sandbox-alert-title");
+        const bodyEl = document.getElementById("sandbox-alert-body");
+        if (alertBox) {
+          alertBox.style.display = "block";
+          titleEl.textContent = "Multi-Agency Exceptions Detected (eCourts & RoR)";
+          bodyEl.innerHTML = `<ul>${res.contradictions.map(c => `<li><b>${c.code}:</b> ${c.message}</li>`).join('')}</ul>`;
+        }
+        window.app.showNotification("Multi-agency audit flagged 3 critical exceptions on P-118.", "warning");
+        window.app.selectParcel(118);
+      }
+
+      runSIAAudit() {
+        const res = this.sandbox.runSIAInclusionAudit();
+        const alertBox = document.getElementById("sandbox-invariant-alert");
+        const titleEl = document.getElementById("sandbox-alert-title");
+        const bodyEl = document.getElementById("sandbox-alert-body");
+        if (alertBox) {
+          alertBox.style.display = "block";
+          titleEl.textContent = "INVARIANT-4 VIOLATION: No Family Invisible Circuit Breaker Engaged";
+          bodyEl.innerHTML = `
+            <p>SIA Household Census contains <b>4 vulnerable families</b> residing on Sy No. 118 with zero Section 23 award mapping:</p>
+            <ul>${res.missingVulnerable.map(h => `<li><b>${h.head}</b> (${h.category}) - ${h.count} members [Livelihood: Landless]</li>`).join('')}</ul>
+            <p style="margin-top: 8px;"><b>Statutory Enforcement:</b> Section 19 final acquisition declaration is blocked until supplementary rehabilitation award is formulated.</p>
+          `;
+        }
+        window.app.showNotification("SIA Circuit Breaker Engaged: 4 vulnerable families protected.", "danger");
+      }
+
+      testPrematureHandover() {
+        const res = this.sandbox.attemptPrematureHandover(118);
+        const alertBox = document.getElementById("sandbox-invariant-alert");
+        const titleEl = document.getElementById("sandbox-alert-title");
+        const bodyEl = document.getElementById("sandbox-alert-body");
+        if (alertBox) {
+          alertBox.style.display = "block";
+          titleEl.textContent = res.title;
+          bodyEl.innerHTML = `<p>${res.reason}</p><p style="margin-top: 6px;"><b>Evidence Defense:</b> Construction handover rejected by DHARTI invariant engine.</p>`;
+        }
+        window.app.showNotification(res.title, "danger");
+        window.app.selectParcel(118);
+      }
+
+      vacateStayAndRefresh() {
+        this.sandbox.vacateCourtStay(118);
+        window.app.updateUI();
+        window.app.selectParcel(118);
+        window.app.showNotification("High Court stay vacated under Section 3H(4) deposit.", "success");
+        const alertBox = document.getElementById("sandbox-invariant-alert");
+        if (alertBox) alertBox.style.display = "none";
+      }
+
+      disburseCompensationAndRefresh() {
+        this.sandbox.reconcilePFMSPayment(118);
+        window.app.updateUI();
+        window.app.selectParcel(118);
+        window.app.showNotification("PFMS Bank settlement confirmed! UTR: SBIN426245890118.", "success");
+      }
+
+      completePossessionAndRefresh() {
+        this.sandbox.confirmFieldPossession(118);
+        window.app.updateUI();
+        window.app.selectParcel(118);
+        const pci = PCIEngine.computePCI(window.dataStore.parcels, window.dataStore.project.alignment_length_km);
+        window.app.showNotification(`Field Panchnama Certified! Parcel P-118 is Ready. Corridor PCI jumped to ${pci.pci}%!`, "success");
+      }
+
+      async runFullWalkthroughDemo() {
+        window.app.switchTab("sandbox");
+        window.app.showNotification("Starting SIH 26016 4-Minute Demo Walkthrough...", "info");
+        await new Promise(r => setTimeout(r, 1000));
+
+        this.runMultiAgencyAudit();
+        await new Promise(r => setTimeout(r, 2000));
+
+        this.testPrematureHandover();
+        await new Promise(r => setTimeout(r, 2000));
+
+        this.vacateStayAndRefresh();
+        await new Promise(r => setTimeout(r, 1500));
+
+        this.disburseCompensationAndRefresh();
+        await new Promise(r => setTimeout(r, 1500));
+
+        this.completePossessionAndRefresh();
+        await new Promise(r => setTimeout(r, 1000));
+
+        window.app.switchTab("cockpit");
+        window.app.showNotification("Demo Walkthrough Completed: 10.0 km continuous frontage achieved!", "success");
+      }
+    }
+
+    window.testRunner = new TestRunnerGlue();
+  </script>
+</body>
+</html>
