@@ -14,6 +14,7 @@ __pycache__/
 *.so
 *.dll
 *.dylib
+*.exe
 .Python
 build/
 develop-eggs/

@@ -94,8 +94,11 @@ class PCIService:
     def _load_or_build_native_lib(self) -> Optional[ctypes.CDLL]:
         """Loads compiled C++ shared library or builds it if g++ is present."""
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../native"))
-        dll_name = "pci_engine.dll" if os.name == "nt" else "libpci_engine.so"
-        dll_path = os.path.join(base_dir, dll_name)
+        core_name = "dharti_core.dll" if os.name == "nt" else "libdharti_core.so"
+        core_path = os.path.join(base_dir, core_name)
+        legacy_name = "pci_engine.dll" if os.name == "nt" else "libpci_engine.so"
+        legacy_path = os.path.join(base_dir, legacy_name)
+        dll_path = core_path if os.path.exists(core_path) else legacy_path
         cpp_path = os.path.join(base_dir, "pci_engine.cpp")
 
         # Attempt to compile if DLL missing but C++ source and g++ exist

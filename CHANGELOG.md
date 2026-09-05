@@ -11,6 +11,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.0] - 2026-09-05
+
+### Added
+- **C++ Domain Core (`include/dharti/`)**:
+  - `include/dharti/core/base.hpp`: Abstract C++ `BaseService` interface and health check reporting.
+  - `include/dharti/core/event_envelope.hpp`: Standardized Canonical Event Envelope.
+  - `include/dharti/models/parcel.hpp`: `ParcelVersion` and decoupled `ParcelState` state machine.
+  - `include/dharti/models/claimant.hpp`: `Household` and `ClaimantState` models.
+  - `include/dharti/models/payment.hpp`: `PaymentRecord` and `PaymentState` models.
+  - `include/dharti/models/contradiction.hpp`: `ContradictionCase` and severity types.
+- **C++ Native Services**:
+  - `ContradictionEngine` (`include/dharti/services/contradiction_engine.hpp`, `src/native/contradiction_engine.cpp`): Evaluates RoR vs Cadastral map area discrepancies and eCourts stay orders.
+  - `SIAInclusionEngine` (`include/dharti/services/sia_inclusion_engine.hpp`, `src/native/sia_inclusion_engine.cpp`): Enforces the "No Family Invisible" rule, flagging missing vulnerable households.
+  - Unified C ABI (`src/native/dharti_c_api.h`, `src/native/dharti_c_api.cpp`) and compilation pipeline (`build_native.py`) producing `dharti_core.dll`.
+- **Python Service Wrappers**:
+  - `ContradictionService` (`src/services/contradiction/contradiction_service.py`): Python service with native acceleration and fallback.
+  - `SIAInclusionService` (`src/services/sia/sia_service.py`): Python service with native acceleration and fallback.
+- **Automated Verification**:
+  - Standalone native C++ test binary (`tests/cpp/test_dharti_core.cpp`).
+  - Unit test suite (`tests/unit/test_domain_engines.py`) validating C++ and Python parity.
+
+### Changed
+- Converted single-purpose `pci_engine.dll` into unified `dharti_core.dll`.
+- Cleaned up redundant single-target binaries.
+- Ignored `*.exe` in `.gitignore`.
+
+---
+
 ## [0.2.0] - 2026-09-05
 
 ### Added
