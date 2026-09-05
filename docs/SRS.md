@@ -14,6 +14,7 @@
 | :--- | :--- | :--- | :--- |
 | **1.0.0** | 2026-09-05 | Antigravity AI / Bhavesh Bhardwaj | Complete baseline SRS synthesized from SIH 26016 Architecture & Workflow Specification. |
 | **1.1.0** | 2026-09-05 | Antigravity AI / Bhavesh Bhardwaj | Added Section 7.1.1: Native C++ Acceleration for PCI engine & established formal CHANGELOG. |
+| **1.2.0** | 2026-09-05 | Antigravity AI / Bhavesh Bhardwaj | Fully converted codebase to high-performance pure C++17 modular architecture; removed redundant Python layers. |
 
 ---
 
@@ -93,35 +94,31 @@ DHARTI is organized as a clean, event-driven modular monolith with decoupled com
 +---------------------------------------------------------------------------------------------------+
 ```
 
-### 4.1 Physical Codebase Modular Structure
+### 4.1 Physical Codebase Modular Structure (Pure C++17)
 ```
 dharti/
-├── config/                 # Application settings, environment loaders, constants
+├── Makefile                # Build automation (compile shared lib & test runner)
+├── build.ps1               # One-click PowerShell build and verification script
+├── CHANGELOG.md            # Living changelog tracking all revisions
 ├── docs/                   # Specifications, architecture manuals, diagrams
 │   ├── SRS.md              # Living Software Requirements Specification
 │   ├── ARCHITECTURE.md     # Architecture overview and design patterns
 │   └── resources/          # Source PDFs, posters, reference schemas
-├── src/                    # Modular source code
-│   ├── api/                # Delivery controllers, REST routers, DTO schemas
-│   ├── core/               # Base abstractions, event bus, event envelope, audit
-│   ├── models/             # Domain entities (Parcel, Claimant, Payment, Case, Award)
-│   ├── services/           # Domain business logic & state machines
-│   │   ├── alignment/      # Alignment & chainage interval service
-│   │   ├── contradiction/  # Contradiction detection engine
-│   │   ├── pci/            # Possession Continuity Index & unlock simulator
-│   │   ├── reconciliation/ # Payment & financial reconciliation engine
-│   │   ├── sia_inclusion/  # No-Family-Invisible SIA matching engine
-│   │   └── workflow/       # Decoupled state machines & statutory SLA clocks
-│   ├── adapters/           # Federated data source adapters (mock & production)
-│   │   ├── land_record/    # RoR and Cadastral GIS adapter
-│   │   ├── court/          # eCourts and RCCMS revenue court adapter
-│   │   └── finance/        # PFMS and Bank acknowledgement adapter
-│   └── utils/              # Cryptographic hashing, spatial helpers, logger, redaction
-├── tests/                  # Test suites
-│   ├── unit/               # Domain unit tests
-│   ├── integration/        # Cross-module & adapter pipeline tests
-│   └── e2e/                # End-to-end demo walkthrough tests
-├── .gitignore              # Git ignore rules
+├── include/                # Public C++ Header Specifications
+│   └── dharti/
+│       ├── config/         # AppConfig environment loader (settings.hpp)
+│       ├── core/           # Base abstractions (base.hpp, event_envelope.hpp)
+│       ├── models/         # Domain entities (parcel.hpp, claimant.hpp, payment.hpp, contradiction.hpp)
+│       ├── services/       # Domain business logic (contradiction_engine.hpp, pci_engine.hpp, sia_inclusion_engine.hpp)
+│       └── utils/          # Structured logger utility (logger.hpp)
+├── src/                    # C++ Implementations
+│   ├── config/             # Config implementation (settings.cpp)
+│   ├── services/           # Service implementations (pci_engine.cpp)
+│   ├── utils/              # Logger implementation (logger.cpp)
+│   └── native/             # Core computational engines & exported C ABI (dharti_c_api.cpp, pci_engine.cpp, etc.)
+├── tests/                  # Automated C++ Test Suites
+│   └── cpp/                # Unit & integration test runners (test_main.cpp)
+├── .gitignore              # Clean ignore rules
 └── README.md               # Quickstart and project navigation
 ```
 

@@ -11,6 +11,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.0] - 2026-09-05
+
+### Added
+- **Pure C++17 Architecture**:
+  - `include/dharti/config/settings.hpp` & `src/config/settings.cpp`: Thread-safe C++ environment and application configuration loader.
+  - `include/dharti/utils/logger.hpp` & `src/utils/logger.cpp`: Timestamped structured C++ logger utility.
+  - `include/dharti/services/pci_engine.hpp` & `src/services/pci_engine.cpp`: Object-oriented C++ PCIEngine service wrapper.
+  - `tests/cpp/test_main.cpp`: Comprehensive standalone native C++ test runner testing Config, Logger, Models, Contradiction Engine, SIA Inclusion Engine, and PCI Engine.
+  - `Makefile`: Build automation targets for building `dharti_core.dll` and running `test_dharti_core.exe` via `g++` and `make`.
+  - `build.ps1`: One-click PowerShell build and verification script.
+
+### Removed
+- **Eliminated All Redundant Python Code**:
+  - Removed all `.py` files across `src/`, `config/`, and `tests/` (`base.py`, `pci_service.py`, `contradiction_service.py`, `sia_service.py`, `settings.py`, `logger.py`, `build_native.py`, `test_*.py`).
+  - Removed Python package markers (`__init__.py`) and cached bytecode (`__pycache__`).
+  - Converted DHARTI into a 100% pure high-performance C++ codebase with zero Python dependency.
+
+---
+
 ## [0.3.0] - 2026-09-05
 
 ### Added

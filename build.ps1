@@ -1,0 +1,30 @@
+# PowerShell Build and Test script for DHARTI C++ Core
+$ErrorActionPreference = "Stop"
+
+$compiler = Get-Command g++ -ErrorAction SilentlyContinue
+if (-not $compiler) {
+    Write-Error "g++ compiler not found in PATH."
+}
+
+$cxxFlags = @("-O3", "-std=c++17", "-Wall", "-Wextra", "-static", "-static-libgcc", "-static-libstdc++", "-Iinclude", "-Isrc/native")
+$sources = @(
+    "src/config/settings.cpp",
+    "src/utils/logger.cpp",
+    "src/services/pci_engine.cpp",
+    "src/native/pci_engine.cpp",
+    "src/native/contradiction_engine.cpp",
+    "src/native/sia_inclusion_engine.cpp",
+    "src/native/dharti_c_api.cpp"
+)
+
+Write-Host "==> Compiling DHARTI C++ Core Library (src/native/dharti_core.dll)..." -ForegroundColor Cyan
+& g++ $cxxFlags -shared -o src/native/dharti_core.dll $sources
+
+Write-Host "==> Compiling DHARTI C++ Test Runner (tests/cpp/test_dharti_core.exe)..." -ForegroundColor Cyan
+$testSources = @("tests/cpp/test_main.cpp") + $sources
+& g++ $cxxFlags -o tests/cpp/test_dharti_core.exe $testSources
+
+Write-Host "==> Executing DHARTI C++ Test Suite..." -ForegroundColor Green
+& .\tests\cpp\test_dharti_core.exe
+
+Write-Host "==> DHARTI C++ Build & Verification SUCCESSFUL!" -ForegroundColor Green

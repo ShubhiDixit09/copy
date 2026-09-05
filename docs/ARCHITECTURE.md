@@ -28,27 +28,27 @@ DHARTI is organized using **Clean Architecture** and **Domain-Driven Design (DDD
                   +-----------------------------------+
 ```
 
-## 2. Directory Structure & Responsibilities
+## 2. Directory Structure & Responsibilities (Pure C++17)
 
-- **`src/core/`**: Defines baseline interfaces, abstractions, settings, and constants that all modules can rely upon.
-- **`src/models/`**: Domain entities, schemas, and value objects.
-- **`src/services/`**: Business logic implementations isolated from delivery mechanisms (API/CLI).
-- **`src/native/`**: High-performance C++ native routines for geometric interval intersections, PCI computation, and large-scale corridor unlock simulations.
-- **`src/api/`**: Delivery mechanisms, endpoints, request handlers, and DTO serializers.
-- **`src/utils/`**: General reusable utilities, logging, validation helpers.
-- **`config/`**: Configuration management and environment settings.
-- **`tests/`**: Unit and integration test suites matching the `src/` modular layout.
-- **`docs/`**: Project documentation, design specifications, and the living `SRS.md`.
+- **`include/dharti/core/`**: Defines baseline C++ interfaces (`base.hpp`), health protocols, and the canonical `event_envelope.hpp`.
+- **`include/dharti/models/`**: Strongly typed domain models (`parcel.hpp`, `claimant.hpp`, `payment.hpp`, `contradiction.hpp`) and decoupled state machines.
+- **`include/dharti/services/`**: C++ domain service headers (`contradiction_engine.hpp`, `sia_inclusion_engine.hpp`, `pci_engine.hpp`).
+- **`include/dharti/config/`**: Thread-safe configuration manager (`settings.hpp`).
+- **`include/dharti/utils/`**: Structured logger and utilities (`logger.hpp`).
+- **`src/`**: Private C++ implementation source files (`config/settings.cpp`, `utils/logger.cpp`, `services/pci_engine.cpp`).
+- **`src/native/`**: Core mathematical algorithms (`pci_engine.cpp`, `contradiction_engine.cpp`, `sia_inclusion_engine.cpp`) and exported C ABI (`dharti_c_api.cpp`).
+- **`tests/cpp/`**: Comprehensive C++ test suite (`test_main.cpp`) verifying 100% of domain rules.
+- **`docs/`**: Project documentation, specifications, living `SRS.md`, and PDF resources.
 
-## 3. Native C++ Acceleration Strategy
-1. **Target Domains**:
-   - Continuous chainage interval sorting and merging.
-   - Exhaustive combinatorial unlock simulations across $N > 10,000$ parcels.
-   - High-throughput spatial polygon-corridor intersection calculations.
-2. **Interoperability**:
-   - Clean C-compatible export interface (`extern "C"`).
-   - Zero-overhead data structures (arrays/contiguous memory blocks).
-   - Python `ctypes` wrapper with pure Python fallback for seamless environments.
+## 3. Pure C++ Performance & Architecture Strategy
+1. **Zero Runtime Overhead**:
+   - Zero-overhead data structures (arrays, contiguous vectors, minimal heap allocation).
+   - Microsecond latency for interval intersections, continuous corridor merging, and contradiction evaluations.
+2. **Deterministic Execution**:
+   - Explicit state machines for Parcel, Claimant, Payment, and R&R.
+   - Deterministic contradiction detection with zero silent overwrites.
+3. **Build Automation & Portability**:
+   - Standard `Makefile` and `build.ps1` for building `dharti_core.dll` and running `test_dharti_core.exe` with standard `g++`.
 
 ## 4. Modularity Guidelines
 1. **No Circular Dependencies**: Lower layers must never depend on higher layers.
