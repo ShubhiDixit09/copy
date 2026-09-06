@@ -3,6 +3,8 @@
 **Evidence-Backed National Land Acquisition Control Plane**  
 *SIH 26016 - High-Performance Pure C++ Modular Architecture*
 
+DHARTI now includes **NyayaBot**, a role-aware evidence copilot that explains parcel blockers, PCI, payment, family-inclusion, policy and audit results using cited DHARTI evidence. It may create review drafts, but it never makes an ownership/entitlement decision or mutates an official parcel, payment or court state.
+
 [![GitHub repo](https://img.shields.io/badge/GitHub-BhaveshBhardwaj%2FDHARTI-blue.svg)](https://github.com/BhaveshBhardwaj/DHARTI)
 [![Language](https://img.shields.io/badge/Language-C%2B%2B17-orange.svg)](include/dharti/)
 [![Documentation](https://img.shields.io/badge/Docs-SRS%20v1.2.0-green.svg)](docs/SRS.md)
@@ -24,6 +26,7 @@ dharti/
 ├── docs/                                                         # Living documentation & specifications
 │   ├── SRS.md                                                    # Living Software Requirements Specification
 │   ├── ARCHITECTURE.md                                           # Architectural design and principles
+│   ├── NYAYABOT_INTEGRATION.md                                   # NyayaBot tool, privacy and production contract
 │   └── resources/                                                # Source PDFs and workflow posters
 ├── include/                                                      # C++ Public Header Directory
 │   └── dharti/
@@ -58,10 +61,25 @@ dharti/
 │       ├── pci_engine.h                                          # Low-level native interval header
 │       └── sia_inclusion_engine.cpp                              # SIA inclusion rule logic
 └── tests/                                                        # C++ Automated Test Suites
-    └── cpp/
-        ├── test_dharti_core.cpp                                  # Domain-specific verification
-        └── test_main.cpp                                         # Comprehensive test runner executable
+    ├── cpp/
+    │   ├── test_dharti_core.cpp                                  # Domain-specific verification
+    │   └── test_main.cpp                                         # Comprehensive test runner executable
+    └── js/
+        └── test_nyaya_bot.js                                     # NyayaBot grounding, privacy and safety tests
 ```
+
+---
+
+## ⚖️ NyayaBot Evidence Copilot
+
+Open the dashboard and select **Ask NyayaBot** in the bottom-right corner. Example questions:
+
+- `Why is parcel P-118 blocked?`
+- `What is the current PCI and highest-unlock parcel?`
+- `Are any affected families missing from award or R&R records?`
+- `Trace payment status for the selected parcel.`
+
+Every response contains an Answer Receipt, evidence references, source freshness, a confidence label and the human-decision boundary. See [NyayaBot × DHARTI Integration](docs/NYAYABOT_INTEGRATION.md) for the complete role/tool contract and production path.
 
 ---
 
@@ -76,6 +94,7 @@ dharti/
 ```bash
 make
 make test
+make test-nyayabot
 ```
 
 ### Option 3: Manual g++ Command

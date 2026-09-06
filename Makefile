@@ -27,7 +27,7 @@ TARGET_LIB = src/native/dharti_core.dll
 TEST_BIN = tests/cpp/test_dharti_core.exe
 CLI_BIN = bin/dharti_cli.exe
 
-.PHONY: all clean test cli
+.PHONY: all clean test test-nyayabot cli
 
 all: $(TARGET_LIB) $(TEST_BIN) $(CLI_BIN)
 
@@ -47,6 +47,10 @@ $(CLI_BIN): $(CLI_SOURCES)
 test: $(TEST_BIN)
 	@echo [TEST] Executing DHARTI C++ Test Suite...
 	./$(TEST_BIN)
+
+test-nyayabot:
+	@echo [TEST] Executing NyayaBot JavaScript Test Suite...
+	node tests/js/test_nyaya_bot.js
 
 cli: $(CLI_BIN)
 	@echo [RUN] Launching DHARTI CLI...

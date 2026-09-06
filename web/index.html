@@ -48,6 +48,7 @@
             <option value="state">State Revenue Department (Karnataka)</option>
             <option value="piu">Project Director (NHAI PIU)</option>
             <option value="auditor">CAG / Statutory Auditor</option>
+            <option value="claimant">Verified Affected Family / Citizen</option>
           </select>
         </div>
 
@@ -81,8 +82,21 @@
     </button>
   </nav>
 
+  <section id="claimant-access-view" class="claimant-access-view" hidden>
+    <div class="claimant-access-card">
+      <span class="claimant-access-kicker">Verified citizen access</span>
+      <h2>Understand your acquisition case without exposing anyone else&rsquo;s records.</h2>
+      <p>NyayaBot can explain your own payment, documents, entitlements and grievance path after Digital Claim ID verification.</p>
+      <div class="claimant-access-actions">
+        <button class="btn-action btn-primary" type="button" onclick="window.nyayaBot.open()">Open NyayaBot</button>
+        <button class="btn-action btn-secondary" type="button" onclick="window.nyayaBot.askPreset('How can I securely check my own compensation payment status?')">Check my case safely</button>
+      </div>
+      <small>Project-wide personal records and administrative actions remain hidden in citizen mode.</small>
+    </div>
+  </section>
+
   <!-- Application Body -->
-  <main class="app-container">
+  <main id="official-workspace" class="app-container">
 
     <!-- KPI Summary Grid (8 Key Parameters) -->
     <section class="kpi-grid-container" aria-label="Key Land Acquisition Parameters">
@@ -525,6 +539,73 @@
   <!-- Notification Toast Container -->
   <div id="notification-toast-container"></div>
 
+  <!-- NyayaBot: role-aware, evidence-grounded access to DHARTI -->
+  <button
+    id="nyayabot-toggle"
+    class="nyayabot-toggle"
+    type="button"
+    aria-controls="nyayabot-panel"
+    aria-expanded="false"
+  >
+    <span class="nyayabot-toggle-mark" aria-hidden="true">न्या</span>
+    <span>
+      <strong>Ask NyayaBot</strong>
+      <small>Evidence Copilot</small>
+    </span>
+  </button>
+
+  <aside id="nyayabot-panel" class="nyayabot-panel" aria-hidden="true" aria-label="NyayaBot Evidence Copilot">
+    <header class="nyayabot-header">
+      <div class="nyayabot-brand">
+        <span class="nyayabot-logo" aria-hidden="true">न्या</span>
+        <div>
+          <h2>NyayaBot</h2>
+          <p>Evidence-grounded DHARTI copilot</p>
+        </div>
+      </div>
+      <button id="nyayabot-close" class="nyayabot-icon-btn" type="button" aria-label="Close NyayaBot">&times;</button>
+    </header>
+
+    <div class="nyayabot-context-bar">
+      <span id="nyayabot-role-context">Role-scoped access</span>
+      <span id="nyayabot-parcel-context">Parcel P-118</span>
+      <label class="nyayabot-language">
+        <span class="sr-only">Response language</span>
+        <select id="nyayabot-language-select">
+          <option value="en">English</option>
+          <option value="hi">हिन्दी</option>
+          <option value="hinglish">Hinglish</option>
+        </select>
+      </label>
+    </div>
+
+    <div id="nyayabot-messages" class="nyayabot-messages" aria-live="polite"></div>
+
+    <div id="nyayabot-suggestions" class="nyayabot-suggestions" aria-label="Suggested questions">
+      <button type="button" data-nyaya-query="Why is parcel P-118 blocked?">Why is P-118 blocked?</button>
+      <button type="button" data-nyaya-query="What is the current PCI and highest-unlock parcel?">Explain PCI</button>
+      <button type="button" data-nyaya-query="Are any affected families missing from award or R&R records?">Missing families</button>
+      <button type="button" data-nyaya-query="Trace payment status for the selected parcel.">Payment trace</button>
+    </div>
+
+    <form id="nyayabot-form" class="nyayabot-composer">
+      <label class="sr-only" for="nyayabot-input">Ask NyayaBot about DHARTI</label>
+      <textarea
+        id="nyayabot-input"
+        rows="2"
+        maxlength="600"
+        placeholder="Ask why a parcel is blocked, trace payment, check families or explain PCI..."
+      ></textarea>
+      <button type="submit" aria-label="Send question">Ask</button>
+    </form>
+
+    <footer class="nyayabot-footer">
+      Answers are role-scoped and evidence-cited. NyayaBot drafts actions; authorised officials decide.
+    </footer>
+  </aside>
+
+  <div id="nyayabot-backdrop" class="nyayabot-backdrop" aria-hidden="true"></div>
+
   <!-- Leaflet GIS JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
@@ -535,6 +616,7 @@
   <script src="js/test_sandbox.js"></script>
   <script src="js/mis_reports.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/nyaya_bot.js"></script>
 
   <!-- Test Runner Glue -->
   <script>

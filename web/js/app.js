@@ -16,6 +16,7 @@ class AppController {
     this.mapView.init();
     this.updateUI();
     this.bindEvents();
+    this.applyRoleView();
   }
 
   bindEvents() {
@@ -26,6 +27,11 @@ class AppController {
         this.switchTab(target);
       });
     });
+
+    const roleSelect = document.getElementById("user-role-select");
+    if (roleSelect) {
+      roleSelect.addEventListener("change", () => this.applyRoleView());
+    }
 
     // Custom Data Uploader
     const uploadBtn = document.getElementById("btn-apply-custom-json");
@@ -163,6 +169,21 @@ class AppController {
     this.renderCorridorStrip(window.dataStore.parcels, window.dataStore.project.alignment_length_km);
     if (this.mapView) {
       this.mapView.highlightParcel(parcelId);
+    }
+    window.dispatchEvent(new CustomEvent("dharti:parcel-selected", { detail: { parcelId } }));
+  }
+
+  applyRoleView() {
+    const roleSelect = document.getElementById("user-role-select");
+    const role = roleSelect ? roleSelect.value : "cala";
+    const isClaimant = role === "claimant";
+    const claimantView = document.getElementById("claimant-access-view");
+
+    document.body.classList.toggle("claimant-view", isClaimant);
+    if (claimantView) claimantView.hidden = !isClaimant;
+
+    if (isClaimant && window.nyayaBot) {
+      window.nyayaBot.open();
     }
   }
 
