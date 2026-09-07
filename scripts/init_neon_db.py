@@ -139,10 +139,31 @@ CREATE TABLE IF NOT EXISTS bitemporal_events (
     prev_hash VARCHAR(64) NOT NULL
 );
 
+-- Large Evidence Documents Vault (Decoupled Google Drive Storage)
+CREATE TABLE IF NOT EXISTS evidence_documents (
+    document_id VARCHAR(64) PRIMARY KEY,
+    project_id VARCHAR(64) REFERENCES projects(project_id),
+    parcel_id INT REFERENCES parcels(parcel_id),
+    document_type VARCHAR(64) NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_size_bytes BIGINT NOT NULL,
+    mime_type VARCHAR(128) NOT NULL,
+    sha256_hash VARCHAR(64) NOT NULL UNIQUE,
+    storage_provider VARCHAR(32) DEFAULT 'GOOGLE_DRIVE',
+    gdrive_file_id VARCHAR(128) NOT NULL,
+    gdrive_web_view_link TEXT,
+    gdrive_download_link TEXT,
+    uploaded_at TIMESTAMPTZ DEFAULT NOW(),
+    bitemporal_event_id VARCHAR(64)
+);
+
 -- Indexes for Fast Corridor Queries
 CREATE INDEX IF NOT EXISTS idx_parcels_chainage ON parcels(chainage_start_km, chainage_end_km);
 CREATE INDEX IF NOT EXISTS idx_parcels_state ON parcels(state);
 CREATE INDEX IF NOT EXISTS idx_bitemporal_time ON bitemporal_events(source_timestamp, recorded_timestamp);
+CREATE INDEX IF NOT EXISTS idx_evidence_parcel ON evidence_documents(parcel_id);
+CREATE INDEX IF NOT EXISTS idx_evidence_sha256 ON evidence_documents(sha256_hash);
+
 """
 
 def init_database():
