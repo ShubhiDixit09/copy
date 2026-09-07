@@ -10,6 +10,8 @@
 - **AT-06 (PCI Calculation & Simulation)**: Resolving the highest-priority bottleneck parcel (P-118) recalculates continuous frontage and updates the PCI from 42% to 78% as mathematically predicted.
 - **AT-07 (Offline Field Proof)**: Field survey observations recorded offline sync with valid timestamps and witness proofs upon reconnection.
 - **AT-08 (Privacy Redaction)**: Public and auditor views display aggregate corridor progress with zero exposed PII.
+- **AT-09 (Google Drive Vault Provenance)**: Every public source document (PARIVESH clearance, Bhoomi Rashi gazette) is vaulted to Google Drive under `dharti/raw/...` with a deterministic RFC 6234 SHA-256 digest linked into Neon DB.
+- **AT-10 (7-Rule Evidence Gate Circuit Breaker)**: An anomalous jump in forest diversion area (>300%) or statutory contradiction immediately trips the automated circuit breaker, quarantining the record into Neon DB `exceptions` and preventing premature construction handover.
 
 ---
 

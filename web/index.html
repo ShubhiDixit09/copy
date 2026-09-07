@@ -14,17 +14,30 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
   <!-- Light Theme Design System -->
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=2.2.0">
 </head>
 <body>
+
+  <!-- National Tricolor Ribbon -->
+  <div class="gov-tricolor-ribbon"></div>
 
   <!-- Top Government Bar -->
   <header class="gov-top-bar">
     <div class="gov-emblem-badge">
-      <span>भारत सरकार | GOVERNMENT OF INDIA</span>
+      <span style="font-weight: 700; color: #ff9933;">भारत सरकार</span>
+      <span style="opacity: 0.5;">|</span>
+      <span>GOVERNMENT OF INDIA</span>
+      <span style="opacity: 0.4; margin: 0 4px;">•</span>
+      <span style="color: #cbd5e1;">सड़क परिवहन एवं राजमार्ग मंत्रालय | Ministry of Road Transport & Highways</span>
     </div>
-    <div class="gov-meta-info">
-      <span>Ministry of Road Transport & Highways | National Highways Authority of India (NHAI)</span>
+    <div class="gov-accessibility-links">
+      <a href="#panel-project-tracker" class="gov-acc-link">मुख्य सामग्री पर जाएं / Skip to Main</a>
+      <span class="acc-divider">|</span>
+      <button class="gov-acc-btn" onclick="document.body.style.fontSize='14px'" title="Decrease Text Size">A-</button>
+      <button class="gov-acc-btn" onclick="document.body.style.fontSize='15px'" title="Normal Text Size">A</button>
+      <button class="gov-acc-btn" onclick="document.body.style.fontSize='16px'" title="Increase Text Size">A+</button>
+      <span class="acc-divider">|</span>
+      <span class="gov-lang-badge">हिन्दी / English</span>
     </div>
   </header>
 
@@ -32,16 +45,22 @@
   <div class="main-header">
     <div class="header-inner">
       <div class="brand-section">
-        <div class="brand-logo-icon">ध</div>
-        <div>
-          <h1 class="brand-title">DHARTI</h1>
-          <p class="brand-subtitle">Evidence-Backed National Land Acquisition Control Plane (SIH 26016)</p>
+        <!-- Authentic State Emblem of India -->
+        <img src="assets/emblem_of_india.svg" class="ashoka-emblem-img" width="36" height="56" style="height: 56px !important; width: 36px !important; max-height: 56px !important; max-width: 36px !important; object-fit: contain !important; display: block !important; flex-shrink: 0 !important;" alt="State Emblem of India">
+        <div class="brand-text-block">
+          <div class="brand-sub-ministry">सड़क परिवहन एवं राजमार्ग मंत्रालय | Ministry of Road Transport and Highways</div>
+          <div class="brand-agency-title">भारतीय राष्ट्रीय राजमार्ग प्राधिकरण | National Highways Authority of India</div>
+          <div class="brand-title-row">
+            <h1 class="brand-title">DHARTI <span class="hindi-title">धरती</span></h1>
+            <span class="gatishakti-badge">PM GatiShakti</span>
+            <span class="tagline-text">National Land Acquisition Evidentiary Vault & Control Plane</span>
+          </div>
         </div>
       </div>
 
       <div class="header-controls">
         <div class="role-badge-selector">
-          <span>Viewing As:</span>
+          <span class="role-label">अधिकारी / Role:</span>
           <select id="user-role-select" class="role-select">
             <option value="cala">CALA / Competent Authority (Devanahalli)</option>
             <option value="ministry">Central Ministry / MoRTH</option>
@@ -51,9 +70,14 @@
           </select>
         </div>
 
-        <div class="status-pill-live">
-          <span class="status-dot"></span>
-          <span>C++17 Engine Active</span>
+        <div class="status-pill-live status-drive">
+          <span class="status-dot dot-drive"></span>
+          <span>Google Drive: dharti/</span>
+        </div>
+
+        <div class="status-pill-live status-engine">
+          <span class="status-dot dot-engine"></span>
+          <span>C++17 Engine</span>
         </div>
       </div>
     </div>
@@ -61,7 +85,10 @@
 
   <!-- Main Navigation Tabs -->
   <nav class="nav-tab-container">
-    <button class="nav-tab-btn active" data-tab="cockpit">
+    <button class="nav-tab-btn active" data-tab="project-tracker">
+      <span>🏛️ Project Search & Live Tracking (परियोजना खोज)</span>
+    </button>
+    <button class="nav-tab-btn" data-tab="cockpit">
       <span>Executive Cockpit & GIS Map</span>
     </button>
     <button class="nav-tab-btn" data-tab="sandbox">
@@ -84,59 +111,381 @@
   <!-- Application Body -->
   <main class="app-container">
 
-    <!-- KPI Summary Grid (8 Key Parameters) -->
-    <section class="kpi-grid-container" aria-label="Key Land Acquisition Parameters">
-      <div class="kpi-card">
-        <div class="kpi-header">Corridor Length</div>
-        <div class="kpi-value" id="kpi-corridor-km">12.0 km</div>
-        <div class="kpi-sub">NE-7 Pkg IV (Bengaluru-Chennai)</div>
+    <!-- TAB 0: NATIONAL PROJECT SEARCH & REAL-TIME TRACKING -->
+    <section id="panel-project-tracker" class="tab-content-panel active">
+      
+      <!-- Official Government Hero Banner -->
+      <div class="tracker-hero-banner">
+        <h2 class="tracker-hero-title">
+          <span>🏛️</span>
+          <span>राष्ट्रीय राजमार्ग एवं आधारभूत संरचना परियोजना ट्रैकर | National Project Search & Evidentiary Vault</span>
+        </h2>
+        <p class="tracker-hero-subtitle">
+          Authoritative Land Acquisition & Environmental Clearance Intelligence Portal (MoRTH Bhoomi Rashi & MoEFCC PARIVESH). Real-world government dossiers are fetched by pure C++ collectors, cryptographically validated via RFC 6234 SHA-256, and archived into partitioned immutable storage under <code>dharti/raw/...</code> in Google Drive.
+        </p>
+        
+        <!-- Quick Select National Expressways -->
+        <div class="quick-select-bar">
+          <span class="quick-select-label">त्वरित चयन / Quick Select National Corridors:</span>
+          <button class="quick-proj-btn" data-pid="NHAI-NE7-PKG-04">Bengaluru-Chennai Expressway (NE-7 / NH-48)</button>
+          <button class="quick-proj-btn" data-pid="NHAI-NE4-PKG-17">Delhi-Mumbai Expressway (NE-4 / Vadodara-Kim)</button>
+          <button class="quick-proj-btn" data-pid="NHAI-NE5-PKG-05">Delhi-Amritsar-Katra Expressway (NE-5 / NH-354)</button>
+          <button class="quick-proj-btn" data-pid="NHAI-NH319B-PKG-06">Varanasi-Ranchi-Kolkata Expressway (NH-319B)</button>
+        </div>
       </div>
 
-      <div class="kpi-card">
-        <div class="kpi-header">Continuous Frontage (PCI)</div>
-        <div class="kpi-value text-primary" id="kpi-pci-val">41.67%</div>
-        <div class="kpi-sub" id="kpi-frontage-km">5.0 km Max Run</div>
+      <!-- Search & Input Form Card -->
+      <div class="search-form-card">
+        <h3 style="font-size: 1rem; color: #002147; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+          <span>🔍</span> Query Project Evidentiary Ledger & Official Portals
+        </h3>
+        
+        <div class="search-form-grid">
+          <!-- Field 1: Project Dropdown -->
+          <div class="form-group-gov">
+            <label for="search-project-select">1. Select Ingested National Project</label>
+            <select id="search-project-select" class="form-select-gov">
+              <option value="NHAI-NE7-PKG-04">Bengaluru-Chennai Expressway (NE-7) Pkg IV [KA]</option>
+              <option value="NHAI-NE4-PKG-17">Delhi-Mumbai Expressway (NE-4) Pkg 17 [GJ]</option>
+              <option value="NHAI-NE5-PKG-05">Delhi-Amritsar-Katra Expressway (NE-5) Pkg 5 [PB]</option>
+              <option value="NHAI-NH319B-PKG-06">Varanasi-Ranchi-Kolkata Expressway (NH-319B) [JH]</option>
+              <option value="CUSTOM">-- Search Any Other Project / Custom Query --</option>
+            </select>
+          </div>
+
+          <!-- Field 2: Custom Project Query / Highway -->
+          <div class="form-group-gov">
+            <label for="search-custom-query">2. Project Name / Highway Corridor</label>
+            <input type="text" id="search-custom-query" class="form-input-gov" placeholder="e.g. NH-48, Bengaluru-Chennai, NE-4">
+          </div>
+
+          <!-- Field 3: MoEFCC PARIVESH Proposal ID -->
+          <div class="form-group-gov">
+            <label for="search-proposal-no">3. MoEFCC PARIVESH Proposal No.</label>
+            <input type="text" id="search-proposal-no" class="form-input-gov" placeholder="e.g. IA/KA/NHA/10482/2026 or FP/GJ/ROAD/41829/2025" value="IA/KA/NHA/10482/2026">
+          </div>
+
+          <!-- Field 4: Gazette S.O. Number -->
+          <div class="form-group-gov">
+            <label for="search-gazette-no">4. Bhoomi Rashi Gazette S.O. No.</label>
+            <input type="text" id="search-gazette-no" class="form-input-gov" placeholder="e.g. S.O. 3842(E) or S.O. 2194(E)" value="S.O. 3842(E)">
+          </div>
+
+          <!-- Field 5: State -->
+          <div class="form-group-gov">
+            <label for="search-state-select">5. State / Union Territory</label>
+            <select id="search-state-select" class="form-select-gov">
+              <option value="KA">Karnataka (कर्नाटक)</option>
+              <option value="GJ">Gujarat (गुजरात)</option>
+              <option value="PB">Punjab (पंजाब)</option>
+              <option value="JH">Jharkhand (झारखंड)</option>
+              <option value="MH">Maharashtra (महाराष्ट्र)</option>
+              <option value="TN">Tamil Nadu (तमिलनाडु)</option>
+              <option value="UP">Uttar Pradesh (उत्तर प्रदेश)</option>
+              <option value="RJ">Rajasthan (राजस्थान)</option>
+              <option value="DL">Delhi (दिल्ली)</option>
+            </select>
+          </div>
+
+          <!-- Field 6: District -->
+          <div class="form-group-gov">
+            <label for="search-district">6. District / Tehsil / CALA Office</label>
+            <input type="text" id="search-district" class="form-input-gov" placeholder="e.g. Bengaluru Rural, Bharuch, Jalandhar" value="Bengaluru Rural">
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="search-actions-bar">
+          <button id="btn-search-project" class="btn-gov-primary">
+            <span>🔍 Search Ingested Ledger & Evidentiary Vault</span>
+          </button>
+          
+          <button id="btn-trigger-live-scrape" class="btn-gov-warning" style="background: #15803d;">
+            <span>⚡ Trigger Real-Time Government Web Scraper</span>
+          </button>
+
+          <button id="btn-simulate-anomaly" class="btn-gov-danger">
+            <span>⚠️ Simulate Inconsistent Record (Test 7-Rule Gate)</span>
+          </button>
+          
+          <span style="font-size: 0.76rem; color: #64748b; margin-left: auto;">
+            ⚡ Authoritative Polling Engine: <strong>Pure C++17</strong> (RFC 6234 SHA-256 + HTTPS)
+          </span>
+        </div>
       </div>
 
-      <div class="kpi-card">
-        <div class="kpi-header">Area Notified (Ha)</div>
-        <div class="kpi-value" id="kpi-area-notified">12.24 Ha</div>
-        <div class="kpi-sub">Gazette S.O. 2418(E)</div>
+      <!-- Execution Feedback Alert Box -->
+      <div id="tracker-alert-box" class="alert-gov"></div>
+
+      <!-- Result Section Header -->
+      <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: var(--radius-md); padding: 18px 24px; margin-bottom: 20px; box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        <div>
+          <h2 id="res-proj-title" style="font-size: 1.25rem; font-weight: 800; color: #002147; margin-bottom: 4px;">
+            Bengaluru-Chennai Expressway (NE-7) Package IV <span class="badge-gov-highway">NE-7 / NH-48</span>
+          </h2>
+          <div style="font-size: 0.8rem; color: #475569;">
+            Project Identifier: <strong id="res-proj-id" style="color: #0f172a;">NHAI-NE7-PKG-04</strong> | 
+            Jurisdiction: <strong id="res-proj-jurisdiction" style="color: #0f172a;">Bengaluru Rural, KA (Taluk: Hosakote)</strong>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 0.72rem; color: #64748b; text-transform: uppercase; font-weight: 700;">Last Verified Ingestion</div>
+          <div id="res-last-poll-time" style="font-size: 0.85rem; font-weight: 700; color: #002147; font-family: var(--font-mono);">2026-09-07T19:15:21Z UTC</div>
+        </div>
       </div>
 
-      <div class="kpi-card">
-        <div class="kpi-header">Parcels Handed Over</div>
-        <div class="kpi-value" id="kpi-parcels-ready">3 / 5</div>
-        <div class="kpi-sub">Construction Ready</div>
+      <!-- Real-Time Evidentiary Dossier Cards (Google Drive Connected) -->
+      <div class="dossier-grid">
+        
+        <!-- Card 1: MoEFCC PARIVESH Clearance -->
+        <div class="gov-card">
+          <div class="gov-card-header">
+            <div>
+              <div class="gov-card-title">
+                <span>🌿</span> MoEFCC PARIVESH Clearance
+              </div>
+              <div class="gov-card-subtitle">Forest & Environmental Clearance Portal (parivesh.nic.in)</div>
+            </div>
+            <span id="res-fc-status-badge" class="status-badge-gov bg-gov-success">✓ APPROVED / EC-FC GRANTED</span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">Ministry Proposal No:</span>
+            <span class="dossier-field-value" id="res-fc-proposal-no">IA/KA/NHA/10482/2026</span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">Forest Diversion Area:</span>
+            <span class="dossier-field-value" id="res-fc-area">52.40 Ha</span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">Evidence Vault Location:</span>
+            <span class="dossier-field-value" style="font-family: var(--font-mono); font-size: 0.78rem;">dharti/raw/parivesh/2026/09/07/</span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">Cryptographic SHA-256:</span>
+            <span class="dossier-field-value"><code id="res-fc-sha256" class="hash-badge-code">09430dc2e501e9bf12408190a16c0529c699856376887767d5cceb9971347ca7</code></span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">Google Drive Object ID:</span>
+            <span class="dossier-field-value" id="res-fc-drive-id" style="font-family: var(--font-mono); font-size: 0.76rem; color: #4338ca;">1cBP6hQGUXv9rQXTk7KSfk4XRa7V64MR6</span>
+          </div>
+
+          <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.72rem; color: #16a34a; font-weight: 700;">✓ RFC 6234 Checksum Validated</span>
+            <a id="res-fc-drive-link" href="https://drive.google.com/file/d/1cBP6hQGUXv9rQXTk7KSfk4XRa7V64MR6/view?usp=drivesdk" target="_blank" class="drive-vault-link-btn">
+              <span>📁 Open in Google Drive Vault</span> ↗
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 2: MoRTH Bhoomi Rashi Gazette -->
+        <div class="gov-card">
+          <div class="gov-card-header">
+            <div>
+              <div class="gov-card-title">
+                <span>📜</span> MoRTH Bhoomi Rashi Gazette
+              </div>
+              <div class="gov-card-subtitle">Land Acquisition Notification Portal (bhoomirashi.gov.in)</div>
+            </div>
+            <span id="res-gz-status-badge" class="status-badge-gov bg-gov-success">✓ SECTION 3D (VESTED IN GOVT)</span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">Gazette S.O. Number:</span>
+            <span class="dossier-field-value" id="res-gz-number">S.O. 3842(E)</span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">Statutory Milestone:</span>
+            <span class="dossier-field-value" id="res-gz-type">Section 3D Notification (Title Vested)</span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">Acquired Area (Hectares):</span>
+            <span class="dossier-field-value" id="res-gz-area">48.75 Ha</span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">Evidence Vault Location:</span>
+            <span class="dossier-field-value" style="font-family: var(--font-mono); font-size: 0.78rem;">dharti/raw/bhoomi_rashi/2026/09/07/</span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">Cryptographic SHA-256:</span>
+            <span class="dossier-field-value"><code id="res-gz-sha256" class="hash-badge-code">b6f82501caef11e52ecc55c8c0a4c8477a66cbe11c96cee0b7ecb07e2290c168</code></span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">Google Drive Object ID:</span>
+            <span class="dossier-field-value" id="res-gz-drive-id" style="font-family: var(--font-mono); font-size: 0.76rem; color: #4338ca;">1yBeG1CXKlOGIjwLh5urKlBPBfG4IjveJ</span>
+          </div>
+
+          <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.72rem; color: #16a34a; font-weight: 700;">✓ Gazette Schedule Reconciled</span>
+            <a id="res-gz-drive-link" href="https://drive.google.com/file/d/1yBeG1CXKlOGIjwLh5urKlBPBfG4IjveJ/view?usp=drivesdk" target="_blank" class="drive-vault-link-btn">
+              <span>📁 Open in Google Drive Vault</span> ↗
+            </a>
+          </div>
+        </div>
+
       </div>
 
-      <div class="kpi-card">
-        <div class="kpi-header">Compensation Disbursed</div>
-        <div class="kpi-value text-success" id="kpi-disbursed-inr">₹12.60 Cr</div>
-        <div class="kpi-sub">Sanctioned: <span id="kpi-sanctioned-inr">₹20.25 Cr</span></div>
+      <!-- 7-Rule Evidence Gate Automated Integrity Verdict -->
+      <div class="gov-card" style="margin-bottom: 24px;">
+        <div class="gov-card-header">
+          <div>
+            <div class="gov-card-title">
+              <span>🛡️</span> 7-Rule Evidence Gate Integrity Audit
+            </div>
+            <div class="gov-card-subtitle">Automated mathematical filter guaranteeing tamper-proof, non-contradictory ingestion before control plane commit</div>
+          </div>
+          <span style="font-size: 0.75rem; font-weight: 700; color: #475569; background: #f1f5f9; padding: 4px 10px; border-radius: 4px;">
+            Neon DB Ledger Status: SYNCHRONIZED
+          </span>
+        </div>
+
+        <div id="res-gate-status" class="gate-result-banner gate-accepted">
+          <div class="gate-icon">✓</div>
+          <div>
+            <strong>7-RULE EVIDENCE GATE: AUTO ACCEPTED</strong>
+            <p>Conforms to all 7 deterministic evidence rules. SHA-256 matches immutable Google Drive object. Canonical Event emitted and recorded in Neon DB control plane.</p>
+          </div>
+        </div>
+
+        <div class="rule-checklist-grid">
+          <div id="chk-rule-1" class="rule-check-item rule-pass">
+            <span class="rule-icon">✓</span>
+            <span>Rule 1 — Official Government Source (MoEFCC / MoRTH Authoritative Endpoint)</span>
+          </div>
+          <div id="chk-rule-2" class="rule-check-item rule-pass">
+            <span class="rule-icon">✓</span>
+            <span>Rule 2 — Stable Record Identifier (Standard Ministry Hierarchy)</span>
+          </div>
+          <div id="chk-rule-3" class="rule-check-item rule-pass">
+            <span class="rule-icon">✓</span>
+            <span>Rule 3 — Mandatory Schema Attributes (Area, Status, Stage conformant)</span>
+          </div>
+          <div id="chk-rule-4" class="rule-check-item rule-pass">
+            <span class="rule-icon">✓</span>
+            <span>Rule 4 — Cryptographic SHA-256 Match (RFC 6234 Verified)</span>
+          </div>
+          <div id="chk-rule-5" class="rule-check-item rule-pass">
+            <span class="rule-icon">✓</span>
+            <span>Rule 5 — Impossible Jump Check (Area jump within 300% bounds)</span>
+          </div>
+          <div id="chk-rule-6" class="rule-check-item rule-pass">
+            <span class="rule-icon">✓</span>
+            <span>Rule 6 — Identity Conflict Check (No partition collision detected)</span>
+          </div>
+          <div id="chk-rule-7" class="rule-check-item rule-pass">
+            <span class="rule-icon">✓</span>
+            <span>Rule 7 — Cross-Source Alignment (Gazette and Clearance corridors aligned)</span>
+          </div>
+        </div>
       </div>
 
-      <div class="kpi-card">
-        <div class="kpi-header">Active Court Stays</div>
-        <div class="kpi-value text-danger" id="kpi-stays-count">1</div>
-        <div class="kpi-sub">High Court WP 4021/2023</div>
+      <!-- Self-Explanatory Knowledge & Statutory Guidance Cards -->
+      <div class="guidance-container">
+        <h3 class="guidance-main-title">
+          <span>📖</span>
+          <span>मार्गदर्शिका एवं वैधानिक शब्दावली | Statutory Terminology & Mathematical Engine Guide</span>
+        </h3>
+        <p class="guidance-main-subtitle">
+          Official statutory explanation of how DHARTI unifies multi-ministry land acquisition laws, prevents corrupt compensation claims, and eliminates highway construction bottlenecks.
+        </p>
+
+        <div class="guidance-grid">
+          <div class="guidance-card">
+            <div class="guidance-card-title">1. Project Continuity Index (PCI) / सतत फ्रंटेज</div>
+            <p class="guidance-card-body">
+              Measures continuous usable highway frontage. Having 80% parcels acquired does not allow road laying if plots are separated by court stays. A minimum 5.0 km uninterrupted run is required for heavy equipment deployment.
+            </p>
+          </div>
+
+          <div class="guidance-card">
+            <div class="guidance-card-title">2. Section 3A vs 3D (Bhoomi Rashi) / धारा 3A एवं 3D</div>
+            <p class="guidance-card-body">
+              <strong>Section 3A:</strong> Notification of intention to acquire land for public purpose.<br>
+              <strong>Section 3D:</strong> Final statutory declaration. Upon 3D publication, land vests absolutely in the Central Government free from all encumbrances.
+            </p>
+          </div>
+
+          <div class="guidance-card">
+            <div class="guidance-card-title">3. Cryptographic SHA-256 Provenance / साक्ष्य प्रमाण</div>
+            <p class="guidance-card-body">
+              Every PDF gazette and environmental order is hashed using RFC 6234 SHA-256 at the exact microsecond of fetch. Hashes are recorded in Neon DB; files are locked in Google Drive. Neither can be forged or retroactively altered.
+            </p>
+          </div>
+
+          <div class="guidance-card">
+            <div class="guidance-card-title">4. 7-Rule Evidence Gate / 7-नियम साक्ष्य गेट</div>
+            <p class="guidance-card-body">
+              An automatic circuit breaker. If an incoming scraper payload has a broken checksum, conflicting survey numbers, or an impossible area jump (&gt;300%), it is quarantined into Neon DB <code>exceptions</code> for Human-in-the-Loop review.
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div class="kpi-card">
-        <div class="kpi-header">Surveyed Households</div>
-        <div class="kpi-value" id="kpi-households-count">10</div>
-        <div class="kpi-sub">SIA Census RFCTLARR Ch. II</div>
-      </div>
-
-      <div class="kpi-card">
-        <div class="kpi-header">R&R Entitlements</div>
-        <div class="kpi-value text-warning" id="kpi-rnr-status">60% Mapped</div>
-        <div class="kpi-sub">4 Unmapped Vulnerable</div>
-      </div>
     </section>
 
     <!-- TAB 1: EXECUTIVE COCKPIT & GIS MAP -->
-    <section id="panel-cockpit" class="tab-content-panel active">
+    <section id="panel-cockpit" class="tab-content-panel">
+      
+      <!-- KPI Summary Grid (8 Key Parameters for Alignment Corridor) -->
+      <section class="kpi-grid-container" aria-label="Key Land Acquisition Parameters">
+        <div class="kpi-card">
+          <div class="kpi-header">Corridor Length</div>
+          <div class="kpi-value" id="kpi-corridor-km">12.0 km</div>
+          <div class="kpi-sub">NE-7 Pkg IV (Bengaluru-Chennai)</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">Continuous Frontage (PCI)</div>
+          <div class="kpi-value text-primary" id="kpi-pci-val">41.67%</div>
+          <div class="kpi-sub" id="kpi-frontage-km">5.0 km Max Run</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">Area Notified (Ha)</div>
+          <div class="kpi-value" id="kpi-area-notified">12.24 Ha</div>
+          <div class="kpi-sub">Gazette S.O. 2418(E)</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">Parcels Handed Over</div>
+          <div class="kpi-value" id="kpi-parcels-ready">3 / 5</div>
+          <div class="kpi-sub">Construction Ready</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">Compensation Disbursed</div>
+          <div class="kpi-value text-success" id="kpi-disbursed-inr">₹12.60 Cr</div>
+          <div class="kpi-sub">Sanctioned: <span id="kpi-sanctioned-inr">₹20.25 Cr</span></div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">Active Court Stays</div>
+          <div class="kpi-value text-danger" id="kpi-stays-count">1</div>
+          <div class="kpi-sub">High Court WP 4021/2023</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">Surveyed Households</div>
+          <div class="kpi-value" id="kpi-households-count">10</div>
+          <div class="kpi-sub">SIA Census RFCTLARR Ch. II</div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-header">R&R Entitlements</div>
+          <div class="kpi-value text-warning" id="kpi-rnr-status">60% Mapped</div>
+          <div class="kpi-sub">4 Unmapped Vulnerable</div>
+        </div>
+      </section>
+
       <div class="cockpit-split-grid">
         <!-- Left: Map & Linear Corridor -->
         <div>
@@ -522,6 +871,45 @@
 
   </main>
 
+  <!-- Official Government Portal Footer (GIGW 3.0 & NIC Compliant) -->
+  <footer class="gov-portal-footer">
+    <div class="gov-footer-inner">
+      <div class="gov-footer-branding">
+        <div style="font-size: 2.2rem;">🇮🇳</div>
+        <div class="gov-footer-text">
+          <h4>राष्ट्रीय भूमि अधिग्रहण साक्ष्य नियंत्रण प्रणाली | DHARTI Platform</h4>
+          <p>Designed and developed for Ministry of Road Transport & Highways (MoRTH) & National Highways Authority of India (NHAI)</p>
+          <p style="margin-top: 4px; font-size: 0.72rem; color: #94a3b8;">
+            Compliant with Guidelines for Indian Government Websites (GIGW 3.0) & PM GatiShakti National Master Plan.
+          </p>
+        </div>
+      </div>
+
+      <div class="gov-footer-badges">
+        <div class="gov-compliance-badge">
+          <strong>GIGW 3.0</strong> COMPLIANT
+        </div>
+        <div class="gov-compliance-badge">
+          <strong>Pure C++17</strong> CORE ENGINE
+        </div>
+        <div class="gov-compliance-badge">
+          <strong>RFC 6234</strong> SHA-256 SECURED
+        </div>
+      </div>
+    </div>
+
+    <div class="gov-footer-bottom">
+      <div>
+        <span>Portal Content Managed by: National Highways Authority of India (NHAI), New Delhi</span> | 
+        <span>Hosting: Neon Cloud PostgreSQL & Google Drive Immutable Vault</span>
+      </div>
+      <div>
+        <span>Last Reviewed & Updated: 08-Sep-2026</span> | 
+        <span>Version: v0.10.2 Pure C++ Edition</span>
+      </div>
+    </div>
+  </footer>
+
   <!-- Notification Toast Container -->
   <div id="notification-toast-container"></div>
 
@@ -534,6 +922,7 @@
   <script src="js/map_view.js"></script>
   <script src="js/test_sandbox.js"></script>
   <script src="js/mis_reports.js"></script>
+  <script src="js/project_tracker.js"></script>
   <script src="js/app.js"></script>
 
   <!-- Test Runner Glue -->
@@ -638,6 +1027,7 @@
     }
 
     window.testRunner = new TestRunnerGlue();
+    window.projectTracker = new ProjectTracker();
   </script>
 </body>
 </html>

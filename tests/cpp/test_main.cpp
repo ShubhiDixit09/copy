@@ -22,6 +22,12 @@
 #include "dharti/core/event_store.hpp"
 #include "dharti/services/payment_reconciler.hpp"
 #include "dharti/services/workflow_coordinator.hpp"
+#include "dharti/utils/sha256.hpp"
+#include "dharti/models/evidence.hpp"
+#include "dharti/adapters/parivesh_adapter.hpp"
+#include "dharti/services/evidence_engine.hpp"
+#include "dharti/storage/gdrive_client.hpp"
+#include "dharti/storage/neon_client.hpp"
 
 using namespace dharti;
 
@@ -468,6 +474,202 @@ void test_sih26016_complete_demo_walkthrough() {
     std::cout << ">>> SIH 26016 COMPLETE DEMO WALKTHROUGH FINISHED SUCCESSFULLY <<<\n" << std::endl;
 }
 
+void test_pure_cpp_sha256() {
+    // RFC 6234 standard test vector 1 (empty string)
+    std::string h_empty = utils::SHA256::hash_string("");
+    assert(h_empty == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+
+    // RFC 6234 standard test vector 2 ("abc")
+    std::string h_abc = utils::SHA256::hash_string("abc");
+    assert(h_abc == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+
+    std::cout << "[PASS] Pure C++ SHA-256 Hasher test passed (RFC 6234 standard test vectors verified)." << std::endl;
+}
+
+void test_parivesh_clearance_adapter() {
+    adapters::PariveshAdapter adapter("SZ_REGIONAL");
+    adapters::RawClearanceProposal raw;
+    raw.proposal_no = "IA/KA/NHA/10482/2026";
+    raw.project_name = "Bengaluru-Chennai Expressway Package-2";
+    raw.clearance_category = "FOREST_CLEARANCE";
+    raw.stage = "STAGE_1";
+    raw.state_code = "KA";
+    raw.district = "Bengaluru Rural";
+    raw.diversion_area_ha = 52.4;
+    raw.trees_to_fell = 1420;
+    raw.current_status = "Under Process";
+    raw.submission_date = "2026-05-12";
+    raw.decision_date = "";
+    raw.conditions = {"Compensatory afforestation on non-forest land", "Minimum tree felling"};
+
+    auto norm = adapter.normalize(raw);
+    assert(norm.proposal_no == "IA/KA/NHA/10482/2026");
+    assert(norm.status == "UNDER_PROCESS");
+    assert(!norm.is_approved);
+    assert(norm.metadata.source_system == "PARIVESH");
+    assert(norm.metadata.payload_checksum.length() == 64);
+    assert(!norm.metadata.is_quarantined);
+    assert(adapter.total_processed() == 1);
+
+    std::cout << "[PASS] Pure C++ PARIVESH Adapter test passed (Payload normalized & SHA-256 hashed)." << std::endl;
+}
+
+void test_evidence_engine_7_rules_and_change_detection() {
+    services::EvidenceEngine engine(10.0);
+    adapters::PariveshAdapter adapter;
+
+    // Snapshot 1: Initial Under Process
+    adapters::RawClearanceProposal p1;
+    p1.proposal_no = "IA/KA/NHA/10482/2026";
+    p1.project_name = "Expressway Alignment";
+    p1.clearance_category = "FOREST_CLEARANCE";
+    p1.stage = "STAGE_1";
+    p1.state_code = "KA";
+    p1.district = "Bengaluru Rural";
+    p1.diversion_area_ha = 52.4;
+    p1.trees_to_fell = 1420;
+    p1.current_status = "Under Process";
+    p1.submission_date = "2026-05-12";
+    auto norm1 = adapter.normalize(p1);
+
+    // Rule Evaluation: Valid government record
+    auto gate1 = engine.evaluate_clearance(norm1, "GOVERNMENT", nullptr);
+    assert(gate1.is_accepted);
+    assert(gate1.acceptance_status == "ACCEPTED");
+
+    // Snapshot 2: 30 minutes later -> APPROVED
+    adapters::RawClearanceProposal p2 = p1;
+    p2.current_status = "Approved";
+    p2.decision_date = "2026-09-07";
+    auto norm2 = adapter.normalize(p2);
+
+    auto gate2 = engine.evaluate_clearance(norm2, "GOVERNMENT", &norm1);
+    assert(gate2.is_accepted);
+    assert(gate2.acceptance_status == "ACCEPTED");
+
+    // Change Detection: Detects UNDER_PROCESS -> APPROVED transition
+    auto change = engine.detect_changes(norm2, norm1);
+    assert(change.has_change);
+    assert(change.status_changed);
+    assert(change.new_status == "APPROVED");
+    assert(change.event_type == "CLEARANCE_APPROVED");
+
+    // Create Canonical Event
+    auto ev = engine.create_event(norm2, gate2, change, "DRIVE-FILE-002", "DRIVE-FILE-001");
+    assert(ev.event_type == "CLEARANCE_APPROVED");
+    assert(ev.status == "ACCEPTED");
+    assert(ev.aggregate_id == "IA/KA/NHA/10482/2026");
+    assert(!ev.checksum.empty());
+
+    // Snapshot 3: Anomaly Jump (Rule 5 violation: Area jumps from 52.4 Ha to 5240 Ha, 100x jump)
+    adapters::RawClearanceProposal p3 = p2;
+    p3.diversion_area_ha = 5240.0;
+    auto norm3 = adapter.normalize(p3);
+
+    auto gate3 = engine.evaluate_clearance(norm3, "GOVERNMENT", &norm2);
+    assert(!gate3.is_accepted);
+    assert(gate3.acceptance_status == "QUARANTINED");
+    assert(gate3.violation_rule == "RULE_5_IMPOSSIBLE_AREA_JUMP");
+
+    auto ev_quarantine = engine.create_event(norm3, gate3, change, "DRIVE-FILE-003", "DRIVE-FILE-002");
+    assert(ev_quarantine.status == "QUARANTINED");
+    assert(ev_quarantine.event_type == "EVIDENCE_QUARANTINED");
+
+    // Test Rule 1: Untrusted Authority
+    auto gate_untrusted = engine.evaluate_clearance(norm1, "UNKNOWN_SOURCE", nullptr);
+    assert(!gate_untrusted.is_accepted);
+    assert(gate_untrusted.violation_rule == "RULE_1_UNTRUSTED_AUTHORITY");
+
+    std::cout << "[PASS] Pure C++ 7-Rule Evidence Engine & Change Detector test passed (Approval accepted, Anomaly quarantined)." << std::endl;
+}
+
+void test_gdrive_partitioning_and_base64() {
+    std::string raw_test = "DHARTI SIH 26016 Immutable Evidence Vault";
+    std::string b64 = storage::GDriveClient::base64_encode(raw_test);
+    assert(!b64.empty());
+
+    std::string folder = storage::GDriveClient::build_partition_folder("parivesh");
+    assert(folder.find("dharti/raw/parivesh/") == 0);
+
+    std::string ev_folder = storage::GDriveClient::build_evidence_folder("clearance");
+    assert(ev_folder == "dharti/evidence/clearance");
+
+    std::cout << "[PASS] Pure C++ Google Drive Client helpers test passed (dharti Partitioning & Base64 validated)." << std::endl;
+}
+
+#include "dharti/scrapers/web_scraper.hpp"
+#include "dharti/adapters/bhoomi_rashi_adapter.hpp"
+#include "dharti/services/polling_daemon.hpp"
+
+void test_web_scraper_and_provenance() {
+    scrapers::WebScraper scraper(10);
+    std::string iso_time = scrapers::WebScraper::current_iso_utc();
+    assert(!iso_time.empty());
+    assert(iso_time.find("T") != std::string::npos);
+    assert(iso_time.find("Z") != std::string::npos);
+
+    // Test SHA256 of empty/arbitrary string
+    std::string payload = "{\"test\":\"parivesh_observation\"}";
+    std::string sha = utils::SHA256::hash_string(payload);
+    assert(sha.length() == 64);
+
+    std::cout << "[PASS] Pure C++ WebScraper provenance & timestamping test passed." << std::endl;
+}
+
+void test_bhoomi_rashi_adapter() {
+    adapters::BhoomiRashiAdapter adapter;
+    adapters::RawGazetteNotification raw;
+    raw.notification_number = "S.O. 3842(E)";
+    raw.gazette_type = "3D";
+    raw.highway_number = "NH-48";
+    raw.project_name = "Bengaluru-Chennai Expressway";
+    raw.state_code = "KA";
+    raw.district = "Bengaluru Rural";
+    raw.taluk = "Hosakote";
+    raw.acquired_area_ha = 48.75;
+    raw.published_date = "2026-08-20";
+    raw.survey_numbers = {"104/1", "104/2"};
+
+    auto norm = adapter.normalize(raw);
+    assert(norm.notification_number == "S.O. 3842(E)");
+    assert(norm.gazette_type == "3D");
+    assert(norm.acquired_area_ha == 48.75);
+    assert(!norm.metadata.payload_checksum.empty());
+    assert(norm.metadata.payload_checksum.length() == 64);
+    assert(norm.metadata.source_system == "BHOOMI_RASHI");
+
+    std::cout << "[PASS] Pure C++ Bhoomi Rashi MoRTH Adapter normalization test passed." << std::endl;
+}
+
+void test_location_contradiction_quarantine() {
+    adapters::PariveshAdapter adapter("SZ_REGIONAL");
+    services::EvidenceEngine engine(3.0);
+
+    adapters::RawClearanceProposal p1;
+    p1.proposal_no = "IA/KA/NHA/10482/2026";
+    p1.project_name = "Expressway Package-2";
+    p1.clearance_category = "FOREST_CLEARANCE";
+    p1.stage = "STAGE_1";
+    p1.state_code = "KA";
+    p1.district = "Bengaluru Rural";
+    p1.diversion_area_ha = 52.4;
+    p1.current_status = "Under Process";
+    auto norm1 = adapter.normalize(p1);
+
+    // Simulated hijack/contradiction: state altered from KA to TN
+    adapters::RawClearanceProposal p2 = p1;
+    p2.state_code = "TN";
+    p2.current_status = "Approved";
+    auto norm2 = adapter.normalize(p2);
+
+    auto gate = engine.evaluate_clearance(norm2, "GOVERNMENT", &norm1);
+    assert(!gate.is_accepted);
+    assert(gate.acceptance_status == "QUARANTINED");
+    assert(gate.violation_rule == "RULE_5_LOCATION_CONTRADICTION");
+
+    std::cout << "[PASS] Pure C++ 7-Rule Evidence Engine location contradiction quarantine test passed." << std::endl;
+}
+
 int main() {
     std::cout << "=================================================" << std::endl;
     std::cout << "   DHARTI National Land Acquisition Control Plane" << std::endl;
@@ -476,11 +678,18 @@ int main() {
 
     test_config();
     test_logger();
+    test_pure_cpp_sha256();
     test_models_and_state_machines();
     test_contradiction_engine();
     test_sia_inclusion_engine();
     test_pci_engine();
     test_federated_adapters();
+    test_parivesh_clearance_adapter();
+    test_evidence_engine_7_rules_and_change_detection();
+    test_location_contradiction_quarantine();
+    test_gdrive_partitioning_and_base64();
+    test_web_scraper_and_provenance();
+    test_bhoomi_rashi_adapter();
     test_event_store_and_bitemporal_audit();
     test_payment_reconciliation();
     test_sih26016_complete_demo_walkthrough();

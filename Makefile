@@ -18,7 +18,11 @@ SOURCES = \
 	src/adapters/finance_adapter.cpp \
 	src/core/event_store.cpp \
 	src/services/payment_reconciler.cpp \
-	src/services/workflow_coordinator.cpp
+	src/services/workflow_coordinator.cpp \
+	src/adapters/parivesh_adapter.cpp \
+	src/services/evidence_engine.cpp \
+	src/storage/gdrive_client.cpp \
+	src/storage/neon_client.cpp
 
 TEST_SOURCES = tests/cpp/test_main.cpp $(SOURCES)
 CLI_SOURCES = src/cli/main.cpp $(SOURCES)

@@ -24,7 +24,14 @@ $sources = @(
     "src/adapters/finance_adapter.cpp",
     "src/core/event_store.cpp",
     "src/services/payment_reconciler.cpp",
-    "src/services/workflow_coordinator.cpp"
+    "src/services/workflow_coordinator.cpp",
+    "src/adapters/parivesh_adapter.cpp",
+    "src/services/evidence_engine.cpp",
+    "src/storage/gdrive_client.cpp",
+    "src/storage/neon_client.cpp",
+    "src/scrapers/web_scraper.cpp",
+    "src/adapters/bhoomi_rashi_adapter.cpp",
+    "src/services/polling_daemon.cpp"
 )
 
 Write-Host "==> Compiling DHARTI C++ Core Library (src/native/dharti_core.dll)..." -ForegroundColor Cyan

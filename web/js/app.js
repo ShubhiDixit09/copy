@@ -7,7 +7,7 @@ class AppController {
   constructor() {
     this.mapView = null;
     this.sandbox = new TestSandbox();
-    this.activeTab = "cockpit";
+    this.activeTab = "project-tracker";
     this.selectedParcelId = 118;
   }
 
@@ -16,6 +16,9 @@ class AppController {
     this.mapView.init();
     this.updateUI();
     this.bindEvents();
+    if (window.ProjectTracker) {
+      window.projectTracker = new ProjectTracker();
+    }
   }
 
   bindEvents() {
