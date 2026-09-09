@@ -28,6 +28,7 @@
 #include "dharti/services/evidence_engine.hpp"
 #include "dharti/storage/gdrive_client.hpp"
 #include "dharti/storage/neon_client.hpp"
+#include "dharti/services/explanatory_query_engine.hpp"
 
 using namespace dharti;
 
@@ -670,6 +671,165 @@ void test_location_contradiction_quarantine() {
     std::cout << "[PASS] Pure C++ 7-Rule Evidence Engine location contradiction quarantine test passed." << std::endl;
 }
 
+void test_geotag_and_document_proof() {
+    models::GeoLocation loc;
+    loc.latitude = 13.1986;
+    loc.longitude = 77.7066;
+    loc.elevation_m = 914.5;
+    loc.chainage_start_km = 0.0;
+    loc.chainage_end_km = 12.0;
+    loc.utm_zone = "43N";
+    loc.gps_accuracy_meters = 1.2;
+    loc.boundary_wkt = "POLYGON((77.7012 13.1945, 77.7150 13.2010, 77.7012 13.1945))";
+
+    assert(loc.latitude > 13.0 && loc.latitude < 14.0);
+    assert(loc.longitude > 77.0 && loc.longitude < 78.0);
+    assert(loc.gps_accuracy_meters <= 2.0);
+
+    models::DocumentProof proof;
+    proof.document_id = "DOC-PROOF-TEST-001";
+    proof.document_type = "STAGE1_FOREST_CLEARANCE";
+    proof.official_letter_no = "F.No. 4-KAB819/2026-RO";
+    proof.signatory_officer_name = "Dr. K. S. Murthy, IFS";
+    proof.location = loc;
+    proof.rfc6234_sha256 = "09430dc2e501e9bf12408190a16c0529c699856376887767d5cceb9971347ca7";
+    assert(proof.is_verified);
+    assert(proof.location.latitude == 13.1986);
+
+    std::cout << "[PASS] Pure C++ Geotag Coordinates & Document Proof Model test passed." << std::endl;
+}
+
+void test_generalized_corridor_search() {
+    scrapers::WebScraper scraper;
+
+    // 1. Search without proposal no by keyword "Bengaluru"
+    auto r1 = scraper.search_corridors("Bengaluru");
+    assert(!r1.empty());
+    assert(r1[0].project_id == "NHAI-NE7-PKG-04");
+    assert(r1[0].state == "KA");
+
+    // 2. Search by Highway "NE-4"
+    auto r2 = scraper.search_corridors("NE-4");
+    assert(!r2.empty());
+    assert(r2[0].project_id == "NHAI-NE4-PKG-17");
+    assert(r2[0].district == "Bharuch");
+
+    // 3. State filter "JH"
+    auto r3 = scraper.search_corridors("", "JH");
+    assert(!r3.empty());
+    assert(r3[0].project_id == "NHAI-NH319B-PKG-06");
+
+    // 4. Case-insensitivity check
+    auto r4 = scraper.search_corridors("katra");
+    assert(!r4.empty());
+    assert(r4[0].project_id == "NHAI-NE5-PKG-05");
+
+    std::cout << "[PASS] Pure C++ Generalized Multi-Criteria Corridor Search test passed." << std::endl;
+}
+
+void test_scraper_deduplication() {
+    scrapers::WebScraper scraper;
+    std::string test_id = "PARIVESH-TEST-REC-101";
+    std::string hash1 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+    std::string hash2 = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
+
+    // First time seeing hash1 -> changed
+    assert(scraper.is_payload_changed(test_id, hash1) == true);
+    // Second time seeing hash1 -> deduplicated, not changed!
+    assert(scraper.is_payload_changed(test_id, hash1) == false);
+    // Modified to hash2 -> changed
+    assert(scraper.is_payload_changed(test_id, hash2) == true);
+    // Second time hash2 -> deduplicated
+    assert(scraper.is_payload_changed(test_id, hash2) == false);
+
+    std::cout << "[PASS] Pure C++ Scraper In-Memory SHA-256 Deduplication Cache test passed." << std::endl;
+}
+
+void test_explanatory_query_engine() {
+    auto pci_engine = std::make_shared<services::PCIEngine>();
+    services::ExplanatoryQueryEngine engine(pci_engine);
+
+    std::vector<services::Interval> intervals = {
+        {101, 0.0, 3.0, true},
+        {102, 3.0, 5.0, true},
+        {118, 5.0, 6.5, false}, // Bottleneck parcel P-118
+        {104, 6.5, 10.0, true},
+        {105, 10.0, 12.0, false}
+    };
+
+    // Query 1: Bottleneck explanation
+    auto r1 = engine.answer_query("Why is corridor possession blocked?", 12.0, intervals);
+    assert(r1.category == "BOTTLENECK");
+    assert(r1.affected_parcels_count == 1);
+    assert(!r1.affected_parcel_ids.empty() && r1.affected_parcel_ids[0] == 118);
+    assert(r1.unlock_gain_km > 4.9);
+    assert(r1.statutory_authority.find("RFCTLARR Act 2013") != std::string::npos);
+    assert(!r1.actionable_remediation_steps.empty());
+
+    // Query 2: SIA Vulnerability explanation
+    auto r2 = engine.answer_query("Audit SIA vulnerable families and census", 12.0, intervals);
+    assert(r2.category == "SIA_COMPLIANCE");
+    assert(r2.statutory_authority.find("Section 16") != std::string::npos);
+    assert(r2.affected_parcels_count > 0);
+
+    // Query 3: Court Stay explanation
+    auto r3 = engine.answer_query("What is the legal stay order status?", 12.0, intervals);
+    assert(r3.category == "LEGAL_STAY");
+    assert(r3.direct_answer.find("Writ Petition No. 4021/2023") != std::string::npos);
+
+    std::cout << "[PASS] Pure C++ Explanatory Query Engine & Statutory Citation test passed." << std::endl;
+}
+
+void test_federated_15_portal_suite() {
+    scrapers::WebScraper scraper(5);
+
+    // 1. Verify 15 authoritative portals are registered in the federated catalog
+    const auto& portals = scraper.get_supported_portals();
+    assert(portals.size() == 15);
+
+    bool has_parivesh = false;
+    bool has_bhoomi = false;
+    bool has_bhuvan = false;
+    bool has_pfms = false;
+    bool has_egazette = false;
+
+    for (const auto& p : portals) {
+        assert(!p.portal_id.empty());
+        assert(!p.display_name.empty());
+        assert(!p.official_domain.empty());
+        assert(!p.statutory_basis.empty());
+        assert(p.polling_interval_minutes > 0);
+
+        if (p.portal_id == "MOEFCC_PARIVESH") has_parivesh = true;
+        if (p.portal_id == "KARNATAKA_BHOOMI") has_bhoomi = true;
+        if (p.portal_id == "ISRO_BHUVAN") has_bhuvan = true;
+        if (p.portal_id == "PFMS_TREASURY") has_pfms = true;
+        if (p.portal_id == "EGAZETTE_INDIA") has_egazette = true;
+    }
+    assert(has_parivesh && has_bhoomi && has_bhuvan && has_pfms && has_egazette);
+
+    // 2. Targeted scrape test for State Land Record (Bhoomi)
+    auto obs_bhoomi = scraper.scrape_portal("KARNATAKA_BHOOMI", "SY-118-KUNDANA");
+    assert(obs_bhoomi.source_name.find("BHOOMI") != std::string::npos);
+    assert(obs_bhoomi.sha256.length() == 64);
+    assert(!obs_bhoomi.raw_payload.empty());
+
+    // 3. Targeted scrape test for Central Gazette
+    auto obs_gazette = scraper.scrape_portal("EGAZETTE_INDIA", "S.O. 3842(E)");
+    assert(obs_gazette.source_name.find("GAZETTE") != std::string::npos || obs_gazette.source_name.find("eGazette") != std::string::npos);
+    assert(obs_gazette.sha256.length() == 64);
+
+    // 4. Parallel concurrent scrape across all 15 portals
+    auto all_obs = scraper.scrape_all_portals_for_corridor("NHAI-NE7-PKG-04");
+    assert(all_obs.size() == 15);
+
+    // 5. Verify scraper telemetry metrics
+    auto metrics = scraper.get_metrics();
+    assert(metrics.total_requests >= 17); // 1 bhoomi + 1 gazette + 15 all
+
+    std::cout << "[PASS] Pure C++ Federated 15-Portal Suite & Concurrent Scraper test passed (All 15 portals active)." << std::endl;
+}
+
 int main() {
     std::cout << "=================================================" << std::endl;
     std::cout << "   DHARTI National Land Acquisition Control Plane" << std::endl;
@@ -692,6 +852,11 @@ int main() {
     test_bhoomi_rashi_adapter();
     test_event_store_and_bitemporal_audit();
     test_payment_reconciliation();
+    test_geotag_and_document_proof();
+    test_generalized_corridor_search();
+    test_scraper_deduplication();
+    test_explanatory_query_engine();
+    test_federated_15_portal_suite();
     test_sih26016_complete_demo_walkthrough();
 
     std::cout << "=================================================" << std::endl;
@@ -699,3 +864,4 @@ int main() {
     std::cout << "=================================================" << std::endl;
     return 0;
 }
+

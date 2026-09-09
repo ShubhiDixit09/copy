@@ -1461,9 +1461,1782 @@ body {
 
 @media print {
   body { background: #ffffff; }
-  .gov-top-bar, .main-header, .nav-tab-container, .kpi-grid-container, .btn-action, #notification-toast-container {
+  .gov-top-bar, .main-header, .nav-tab-container, .kpi-grid-container, .btn-action, #notification-toast-container, .dharini-widget-container, .dharini-drawer {
     display: none !important;
   }
   .app-container { padding: 0; }
   .mis-report-container { box-shadow: none; border: none; padding: 0; }
+  .proof-modal-overlay { position: static; background: none; padding: 0; }
+  .proof-modal-dialog { box-shadow: none; border: none; max-height: none; }
+  .official-parchment-sheet { box-shadow: none; border: none; padding: 0; }
 }
+
+/* ==========================================================================
+   OFFICIAL GOVERNMENT DOCUMENT PROOF & GEOTAG MODAL
+   ========================================================================== */
+.proof-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  background: rgba(0, 15, 35, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.proof-modal-overlay.hidden {
+  display: none !important;
+}
+
+.proof-modal-dialog {
+  background: #ffffff;
+  width: 100%;
+  max-width: 960px;
+  max-height: 92vh;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border: 1px solid #cbd5e1;
+}
+
+.proof-modal-header {
+  background: #002147;
+  color: #ffffff;
+  padding: 14px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px solid #ff9933;
+}
+
+.proof-badge-official {
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: #ff9933;
+  color: #002147;
+  padding: 2px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  margin-bottom: 3px;
+}
+
+.proof-title {
+  font-size: 1.12rem;
+  font-weight: 800;
+  margin: 0;
+  color: #ffffff;
+}
+
+.proof-subtitle {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.proof-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.proof-btn-action {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.proof-btn-action:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.proof-btn-close {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.proof-btn-close:hover {
+  opacity: 1;
+}
+
+.proof-modal-body {
+  overflow-y: auto;
+  padding: 24px;
+  background: #f1f5f9;
+}
+
+/* Authentic Government Parchment Sheet */
+.official-parchment-sheet {
+  background: #fffdfa;
+  border: 1px solid #e2d9cc;
+  border-radius: 4px;
+  padding: 32px 38px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+  position: relative;
+  color: #1e293b;
+}
+
+.proof-letterhead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.proof-emblem-wrap {
+  width: 68px;
+  height: 68px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.proof-emblem-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.proof-issuing-auth {
+  text-align: center;
+  flex: 1;
+}
+
+.proof-gov-text {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #002147;
+  letter-spacing: 0.5px;
+}
+
+.proof-ministry-name {
+  font-size: 1.08rem;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 3px 0;
+}
+
+.proof-office-branch {
+  font-size: 0.78rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+.proof-qr-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 75px;
+}
+
+.proof-qr-code {
+  width: 58px;
+  height: 58px;
+  background: #002147;
+  border: 1px solid #0f172a;
+  border-radius: 4px;
+  position: relative;
+  padding: 4px;
+}
+
+.qr-mock-grid {
+  width: 100%;
+  height: 100%;
+  background: repeating-conic-gradient(#ffffff 0% 25%, #002147 0% 50%) 50% / 10px 10px;
+}
+
+.proof-qr-label {
+  font-size: 0.62rem;
+  color: #64748b;
+  font-weight: 700;
+  margin-top: 4px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.proof-divider-line {
+  height: 2px;
+  background: linear-gradient(90deg, #ff9933 0%, #002147 50%, #138808 100%);
+  margin: 14px 0 20px;
+}
+
+.proof-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+}
+
+.proof-meta-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.proof-meta-label {
+  font-size: 0.68rem;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.proof-meta-val {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.proof-nature-pill {
+  font-size: 0.68rem;
+  font-weight: 800;
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.proof-status-pill {
+  font-size: 0.68rem;
+  font-weight: 800;
+  background: #ecfdf5;
+  color: #047857;
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: inline-block;
+  width: fit-content;
+}
+
+.proof-subject-box {
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed #cbd5e1;
+}
+
+.proof-subject-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #002147;
+  letter-spacing: 0.5px;
+}
+
+.proof-subject-text {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: #002147;
+  margin: 4px 0 6px;
+}
+
+.proof-project-ref {
+  font-size: 0.82rem;
+  color: #475569;
+}
+
+/* Geo-tagged DGPS Card */
+.proof-geotag-card {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.proof-geotag-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #bbf7d0;
+  padding-bottom: 8px;
+}
+
+.proof-geotag-title {
+  font-size: 0.88rem;
+  color: #166534;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.proof-dgps-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  background: #15803d;
+  color: #ffffff;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.proof-geotag-content-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 16px;
+}
+
+.proof-coord-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.coord-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  border-bottom: 1px dashed #dcfce7;
+  padding-bottom: 4px;
+}
+
+.coord-label {
+  color: #4b5563;
+  font-weight: 600;
+}
+
+.coord-val {
+  font-weight: 700;
+  color: #14532d;
+}
+
+.proof-map-box {
+  background: #ffffff;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.mini-map-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #166534;
+  margin-bottom: 6px;
+}
+
+.mini-map-ext-link {
+  color: #15803d;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.mini-map-ext-link:hover {
+  text-decoration: underline;
+}
+
+.proof-mini-map-canvas {
+  height: 120px;
+  background: #1e293b;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: radial-gradient(#334155 1px, transparent 1px);
+  background-size: 14px 14px;
+}
+
+.map-crosshair-center {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-pin-pulse {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(34, 197, 94, 0.4);
+  animation: pulseMapPin 2s infinite ease-out;
+}
+
+@keyframes pulseMapPin {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+.map-pin-icon {
+  font-size: 1.3rem;
+  z-index: 2;
+}
+
+.map-overlay-info {
+  position: absolute;
+  bottom: 6px;
+  left: 8px;
+  right: 8px;
+  background: rgba(15, 23, 42, 0.88);
+  color: #ffffff;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 0.68rem;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+}
+
+.proof-wkt-polygon-box {
+  margin-top: 6px;
+  font-size: 0.68rem;
+  background: #f8fafc;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+.wkt-label {
+  color: #64748b;
+  font-weight: 700;
+  display: block;
+}
+
+.wkt-code {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: #0284c7;
+  word-break: break-all;
+}
+
+.proof-section-box {
+  margin-bottom: 20px;
+}
+
+.proof-section-heading {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #002147;
+  margin-bottom: 10px;
+}
+
+.proof-conditions-list {
+  padding-left: 0;
+  list-style: none;
+  font-size: 0.8rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.proof-condition-item {
+  margin-bottom: 6px;
+  padding: 6px 10px;
+  background: #f8fafc;
+  border-left: 3px solid #002147;
+  border-radius: 0 4px 4px 0;
+}
+
+.proof-sign-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e2d9cc;
+}
+
+.proof-sign-box {
+  flex: 1;
+}
+
+.signature-stamp {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.stamp-circular {
+  width: 72px;
+  height: 72px;
+  border: 2px dashed #002147;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.52rem;
+  color: #002147;
+  font-weight: 800;
+  text-align: center;
+  line-height: 1.1;
+  transform: rotate(-8deg);
+}
+
+.stamp-center {
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: #002147;
+}
+
+.signature-line {
+  display: flex;
+  flex-direction: column;
+}
+
+.sig-name {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #002147;
+}
+
+.sig-post {
+  font-size: 0.74rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+.sig-cert {
+  font-size: 0.68rem;
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.digital-cert-badge {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: inline-block;
+  text-align: right;
+}
+
+.cert-title {
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #166534;
+}
+
+.cert-hash {
+  font-size: 0.68rem;
+  color: #475569;
+  font-family: var(--font-mono);
+}
+
+.cert-timestamp {
+  font-size: 0.66rem;
+  color: #64748b;
+}
+
+.cert-rfc {
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: #15803d;
+  text-transform: uppercase;
+}
+
+.proof-vault-footer {
+  background: #0f172a;
+  color: #cbd5e1;
+  border-radius: 6px;
+  padding: 12px 16px;
+}
+
+.vault-hash-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 0.74rem;
+}
+
+.vault-label {
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.vault-code-hash {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: #38bdf8;
+  word-break: break-all;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.vault-links-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.75rem;
+}
+
+.vault-status-text {
+  color: #a7f3d0;
+}
+
+.btn-vault-open {
+  background: #2563eb;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.72rem;
+  transition: background 0.2s;
+}
+
+.btn-vault-open:hover {
+  background: #1d4ed8;
+}
+
+/* ==========================================================================
+   GENERALIZED SEARCH AUTOCOMPLETE DROPDOWN
+   ========================================================================== */
+.search-input-group {
+  position: relative;
+}
+
+.search-autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 0 0 6px 6px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  max-height: 280px;
+  overflow-y: auto;
+  display: none;
+}
+
+.search-autocomplete-dropdown.active {
+  display: block;
+}
+
+.autocomplete-item {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.autocomplete-item:hover, .autocomplete-item.selected {
+  background: #f0f9ff;
+}
+
+.autocomplete-item-main {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #002147;
+}
+
+.autocomplete-item-sub {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.autocomplete-match-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+/* ==========================================================================
+   NICCI AI GOVERNMENT ASSISTANT (NIC CHAT INTERFACE)
+   Exact match for Official NIC Digital Assistant UI
+   ========================================================================== */
+.nicci-widget-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9900;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Floating Callout Pill & Circular Avatar */
+.nicci-fab-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.25s ease;
+}
+
+.nicci-fab-wrapper:hover {
+  transform: translateY(-2px);
+}
+
+/* "NEED HELP? ASK NICCI" Pill Callout (Matches Image 1) */
+.nicci-speech-callout {
+  background: #234ca7;
+  color: #ffffff;
+  padding: 10px 22px;
+  border-radius: 24px;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  box-shadow: 0 4px 14px rgba(35, 76, 167, 0.4);
+  position: relative;
+  white-space: nowrap;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  animation: gentleFloat 3s ease-in-out infinite alternate;
+}
+
+@keyframes gentleFloat {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-3px); }
+}
+
+.nicci-callout-arrow {
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 9px solid #234ca7;
+}
+
+/* Circular Avatar FAB (Matches Image 1) */
+.nicci-fab {
+  position: relative;
+  outline: none;
+}
+
+.nicci-avatar-outer-ring {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 4px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nicci-fab-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.nicci-fab-online-dot {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  background: #00e676;
+  border: 2.5px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Speaking Pulse Ripple on FAB */
+.fab-speaking-pulse .nicci-avatar-outer-ring {
+  box-shadow: 0 0 0 4px rgba(0, 98, 204, 0.4), 0 0 20px rgba(0, 98, 204, 0.5);
+  animation: fabPulse 1.5s infinite;
+}
+
+@keyframes fabPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 98, 204, 0.6); }
+  70% { transform: scale(1.04); box-shadow: 0 0 0 12px rgba(0, 98, 204, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 98, 204, 0); }
+}
+
+/* ==========================================================================
+   NICCI DRAWER CONTAINER (Matches Image 2 & 3)
+   ========================================================================== */
+.nicci-drawer {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  height: 610px;
+  max-height: calc(100vh - 40px);
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 24, 70, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 9901;
+  border: 1px solid #cbd5e1;
+  transition: all 0.3s ease;
+}
+
+.nicci-drawer.hidden {
+  display: none !important;
+}
+
+.nicci-drawer.maximized {
+  width: 680px;
+  height: calc(100vh - 48px);
+}
+
+/* ==========================================================================
+   STATE 1: SPLASH VIEW (Matches Image 2)
+   ========================================================================== */
+.nicci-splash-view {
+  background: linear-gradient(180deg, #0062cc 0%, #0052ad 50%, #00408a 100%);
+  color: #ffffff;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-y: auto;
+}
+
+.nicci-splash-view.hidden {
+  display: none !important;
+}
+
+.nicci-splash-top-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 14px 4px;
+  position: relative;
+}
+
+.nicci-splash-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #ffffff;
+  width: 32px;
+  height: 24px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.nicci-splash-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.nicci-splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 28px 32px;
+  text-align: center;
+  flex: 1;
+}
+
+.nicci-emblem-wrap {
+  width: 58px;
+  margin-bottom: 14px;
+}
+
+.nicci-white-emblem {
+  width: 100%;
+  height: auto;
+  filter: brightness(0) invert(1);
+}
+
+.nicci-splash-title {
+  font-size: 1.22rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 6px;
+  letter-spacing: 0.3px;
+}
+
+.nicci-splash-subtitle {
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0 0 24px;
+  max-width: 290px;
+  line-height: 1.35;
+}
+
+.nicci-splash-avatar-box {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 28px;
+}
+
+.nicci-splash-avatar-glow {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+}
+
+.nicci-splash-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  object-fit: cover;
+  position: relative;
+}
+
+.nicci-splash-form {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nicci-splash-input {
+  background: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 0.92rem;
+  color: #1e293b;
+  outline: none;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.12);
+  text-align: center;
+}
+
+.nicci-splash-input::placeholder {
+  color: #94a3b8;
+}
+
+/* Saffron / Golden Start Button (Matches Image 2) */
+.nicci-btn-start {
+  background: linear-gradient(180deg, #ecb659 0%, #dda23f 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 13px 18px;
+  font-size: 0.98rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+
+.nicci-btn-start:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   STATE 2: ACTIVE CHAT VIEW (Matches Image 3)
+   ========================================================================== */
+.nicci-chat-view {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+.nicci-chat-view.hidden {
+  display: none !important;
+}
+
+/* Top Header Bar */
+.nicci-header {
+  background: #0062cc;
+  color: #ffffff;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nicci-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nicci-header-avatar-wrap {
+  position: relative;
+  width: 38px;
+  height: 38px;
+}
+
+.nicci-header-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1.5px solid #ffffff;
+  object-fit: cover;
+}
+
+.nicci-avatar-sound-waves {
+  display: none;
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 50%;
+  border: 2px solid #00e676;
+}
+
+.nicci-avatar-sound-waves.speaking-active {
+  display: block;
+  animation: speakingRipple 1.2s infinite ease-out;
+}
+
+@keyframes speakingRipple {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+.avatar-speaking-pulse {
+  animation: speakWobble 0.6s infinite alternate ease-in-out;
+}
+
+@keyframes speakWobble {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.08); }
+}
+
+.nicci-header-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.nicci-header-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.3px;
+}
+
+.nicci-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00e676;
+  box-shadow: 0 0 6px #00e676;
+}
+
+.nicci-header-role {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.88);
+  letter-spacing: 0.2px;
+}
+
+.nicci-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.nicci-hdr-icon-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
+
+.nicci-hdr-icon-btn:hover {
+  opacity: 1;
+}
+
+/* Secondary Sub-Toolbar (Matches Image 3) */
+.nicci-sub-toolbar {
+  background: #0056b3;
+  color: #ffffff;
+  padding: 5px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.nicci-toolbar-left,
+.nicci-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nicci-tool-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  opacity: 0.85;
+  padding: 3px 6px;
+  font-size: 0.88rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nicci-tool-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.nicci-tool-btn.active-voice {
+  color: #00e676;
+  opacity: 1;
+  text-shadow: 0 0 6px rgba(0, 230, 118, 0.6);
+}
+
+/* Messages Area */
+.nicci-messages-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 14px;
+  background: #f4f7fb;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Message Rows & Bubbles (Matches Image 3) */
+.nicci-msg-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  position: relative;
+}
+
+.nicci-bot-row {
+  align-self: flex-end;
+  max-width: 90%;
+  flex-direction: row;
+}
+
+.nicci-user-row {
+  align-self: flex-start;
+  max-width: 82%;
+}
+
+.nicci-bubble-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #cbd5e1;
+  flex-shrink: 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.nicci-msg-bubble {
+  background: #0062cc;
+  color: #ffffff;
+  border-radius: 12px 12px 2px 12px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 8px rgba(0, 98, 204, 0.25);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.nicci-user-row .nicci-msg-bubble {
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 12px 12px 12px 2px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.nicci-msg-text {
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: #ffffff;
+}
+
+.nicci-msg-time {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 5px;
+  text-align: right;
+}
+
+/* Bubble Header & Titles */
+.nicci-bubble-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  padding-bottom: 4px;
+}
+
+.nicci-cat-tag {
+  font-size: 0.64rem;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.nicci-verified-tag {
+  font-size: 0.64rem;
+  font-weight: 700;
+  color: #a7f3d0;
+}
+
+.nicci-msg-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+/* Metric Badges in Bot Bubble */
+.nicci-metrics-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 8px 0;
+}
+
+.nicci-metric-badge {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.nicci-statutory-clause {
+  background: rgba(0, 0, 0, 0.15);
+  border-left: 3px solid #ff9933;
+  padding: 6px 10px;
+  border-radius: 0 4px 4px 0;
+  margin: 8px 0;
+  font-size: 0.74rem;
+  color: #e2e8f0;
+}
+
+/* Action Buttons Inside Bubble */
+.nicci-action-cluster {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.nicci-action-btn {
+  background: #ffffff;
+  color: #0062cc;
+  border: none;
+  padding: 7px 12px;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nicci-action-btn:hover {
+  background: #eff6ff;
+  transform: translateY(-1px);
+}
+
+.nicci-action-btn.btn-sec {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.nicci-action-btn.btn-sec:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+/* Chips Cluster */
+.nicci-chips-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.nicci-chip {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.nicci-chip:hover {
+  background: #ffffff;
+  color: #0062cc;
+  transform: translateY(-1px);
+}
+
+/* Typing Indicator (Matches Image 3 dots) */
+.nicci-typing-row {
+  align-self: flex-end;
+}
+
+.typing-bubble {
+  padding: 10px 14px;
+}
+
+.nicci-typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.nicci-typing-dots span {
+  width: 7px;
+  height: 7px;
+  background: #ffffff;
+  border-radius: 50%;
+  display: inline-block;
+  animation: typingBounce 1.4s infinite ease-in-out both;
+}
+
+.nicci-typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+.nicci-typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+.nicci-typing-dots span:nth-child(3) { animation-delay: 0s; }
+
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: scale(0.4); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* Bottom Input Bar (Matches Image 3) */
+.nicci-input-bar {
+  background: #ffffff;
+  border-top: 2px solid #0062cc;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nicci-input {
+  flex: 1;
+  border: 1px solid #cbd5e1;
+  border-radius: 20px;
+  padding: 9px 16px;
+  font-size: 0.84rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.nicci-input:focus {
+  border-color: #0062cc;
+}
+
+.nicci-btn-tool-mic {
+  background: none;
+  border: none;
+  font-size: 1.15rem;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.nicci-btn-tool-mic:hover {
+  background: #f1f5f9;
+}
+
+.nicci-btn-tool-mic.mic-recording {
+  background: #fee2e2;
+  animation: micPulse 1.2s infinite alternate;
+}
+
+@keyframes micPulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.15); }
+}
+
+.nicci-btn-send {
+  background: #0062cc;
+  color: #ffffff;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.nicci-btn-send:hover {
+  background: #0050a8;
+  transform: scale(1.05);
+}
+
+/* ==========================================================================
+   LEAFLET GIS BASEMAP LAYER CONTROLS (OpenStreetMap, Esri Satellite, Topo)
+   ========================================================================== */
+.leaflet-control-layers {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12) !important;
+  padding: 8px 12px !important;
+  font-family: var(--font-sans) !important;
+  font-size: 0.78rem !important;
+  color: #0f172a !important;
+}
+
+.leaflet-control-layers-expanded {
+  padding: 10px 14px !important;
+  min-width: 210px !important;
+}
+
+.leaflet-control-layers-base label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-bottom: 6px !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+}
+
+.leaflet-control-layers-base label:last-child {
+  margin-bottom: 0 !important;
+}
+
+.leaflet-control-layers-base input[type="radio"] {
+  accent-color: #002147 !important;
+  cursor: pointer !important;
+}
+
+/* ==========================================================================
+   FEDERATED MULTI-SOURCE SCRAPER HUB (15 PORTALS)
+   ========================================================================== */
+.scraper-hub-card {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.scraper-hub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.scraper-hub-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #002147;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.scraper-hub-subtitle {
+  font-size: 0.76rem;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.scraper-hub-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge-portals-online {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+.btn-scrape-all {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+  transition: all 0.2s;
+}
+
+.btn-scrape-all:hover {
+  background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Category Filter Tabs */
+.portal-category-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.portal-cat-btn {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.portal-cat-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.portal-cat-btn.active {
+  background: #002147;
+  border-color: #002147;
+  color: #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 33, 71, 0.25);
+}
+
+/* Portal Grid & Cards */
+.portal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.portal-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease-in-out;
+}
+
+.portal-card:hover {
+  border-color: #94a3b8;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.portal-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.portal-name-text {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.portal-domain-link {
+  font-size: 0.7rem;
+  color: #0284c7;
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 2px;
+}
+
+.portal-domain-link:hover {
+  text-decoration: underline;
+}
+
+.portal-cat-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.portal-cat-CLEARANCES_ENVIRONMENT { background: #dcfce7; color: #166534; }
+.portal-cat-LAND_ACQUISITION_CENTRAL { background: #e0f2fe; color: #075985; }
+.portal-cat-REVENUE_RECORDS_STATE { background: #fef3c7; color: #92400e; }
+.portal-cat-JUDICIAL_LITIGATION { background: #ede9fe; color: #5b21b6; }
+.portal-cat-GIS_SPATIAL_SATELLITE { background: #e0e7ff; color: #3730a3; }
+.portal-cat-FINANCIAL_TREASURY { background: #fae8ff; color: #86198f; }
+
+.portal-ministry-text {
+  font-size: 0.73rem;
+  color: #64748b;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.portal-statute-box {
+  background: #f8fafc;
+  border-left: 3px solid #002147;
+  padding: 6px 10px;
+  font-size: 0.7rem;
+  color: #334155;
+  margin-bottom: 10px;
+  border-radius: 0 4px 4px 0;
+}
+
+.portal-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.7rem;
+  color: #64748b;
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.portal-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.status-dot-green {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+}
+
+.btn-portal-scrape {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #002147;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-portal-scrape:hover {
+  background: #002147;
+  color: #ffffff;
+  border-color: #002147;
+}
+
+/* Concurrent Modal Table */
+.scrape-results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+  margin-top: 12px;
+}
+
+.scrape-results-table th {
+  background: #f8fafc;
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 2px solid #cbd5e1;
+  color: #002147;
+  font-weight: 700;
+}
+
+.scrape-results-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.scrape-results-table tr:hover {
+  background: #f8fafc;
+}
+
+
+
+

@@ -30,6 +30,7 @@
 #include "dharti/services/polling_daemon.hpp"
 #include "dharti/storage/gdrive_client.hpp"
 #include "dharti/storage/neon_client.hpp"
+#include "dharti/services/explanatory_query_engine.hpp"
 
 using namespace dharti;
 
@@ -234,6 +235,18 @@ int main(int argc, char* argv[]) {
     bool run_poll_once = false;
     bool run_poll_national = false;
     int interval_secs = 3600; // Default 1 hour polling interval
+    std::string search_query = "";
+    bool do_search = false;
+    std::string explain_query = "";
+    bool do_explain = false;
+    std::string proof_id = "";
+    bool do_proof = false;
+    bool do_list_portals = false;
+    bool do_scrape_all = false;
+    std::string scrape_all_corridor = "NHAI-NE7-PKG-04";
+    bool do_scrape_portal = false;
+    std::string target_portal_id = "";
+    std::string target_record_id = "";
 
     // Parse command line arguments
     for (int i = 1; i < argc; ++i) {
@@ -254,6 +267,177 @@ int main(int argc, char* argv[]) {
         else if (arg == "--interval-hours" && i + 1 < argc) { interval_secs = std::stoi(argv[++i]) * 3600; }
         else if (arg == "--interval-mins" && i + 1 < argc) { interval_secs = std::stoi(argv[++i]) * 60; }
         else if (arg == "--interval-secs" && i + 1 < argc) { interval_secs = std::stoi(argv[++i]); }
+        else if (arg == "--search" && i + 1 < argc) { do_search = true; search_query = argv[++i]; }
+        else if (arg == "--explain" && i + 1 < argc) { do_explain = true; explain_query = argv[++i]; }
+        else if (arg == "--show-proof" && i + 1 < argc) { do_proof = true; proof_id = argv[++i]; }
+        else if (arg == "--list-portals") { do_list_portals = true; }
+        else if (arg == "--scrape-all") {
+            do_scrape_all = true;
+            if (i + 1 < argc && argv[i + 1][0] != '-') scrape_all_corridor = argv[++i];
+        }
+        else if (arg == "--scrape-portal" && i + 1 < argc) {
+            do_scrape_portal = true;
+            target_portal_id = argv[++i];
+            if (i + 1 < argc && argv[i + 1][0] != '-') target_record_id = argv[++i];
+        }
+    }
+
+    if (do_list_portals) {
+        scrapers::WebScraper scraper;
+        auto portals = scraper.get_supported_portals();
+        std::cout << "\n================================================================================" << std::endl;
+        std::cout << "   DHARTI FEDERATED GOVERNMENT SCRAPING PORTALS (TOTAL: " << portals.size() << ")" << std::endl;
+        std::cout << "================================================================================" << std::endl;
+        for (size_t i = 0; i < portals.size(); ++i) {
+            const auto& p = portals[i];
+            std::cout << "  [" << (i + 1) << "] " << p.display_name << std::endl;
+            std::cout << "      * Portal ID      : " << p.portal_id << std::endl;
+            std::cout << "      * Official Domain: " << p.official_domain << std::endl;
+            std::cout << "      * Category       : " << p.category_name << std::endl;
+            std::cout << "      * Ministry/Agency: " << p.ministry_or_agency << std::endl;
+            std::cout << "      * Statutory Basis: " << p.statutory_basis << std::endl;
+            std::cout << "      * Data Ingested  : " << p.data_extracted << std::endl;
+            std::cout << "      * Health Status  : " << p.health_status << " (Polling every " << p.polling_interval_minutes << "m)\n" << std::endl;
+        }
+        std::cout << "================================================================================\n" << std::endl;
+        return 0;
+    }
+
+    if (do_scrape_all) {
+        scrapers::WebScraper scraper;
+        std::cout << "\n================================================================================" << std::endl;
+        std::cout << "   DHARTI FEDERATED CONCURRENT MULTI-SOURCE INGESTION                          " << std::endl;
+        std::cout << "   Corridor Target: " << scrape_all_corridor << std::endl;
+        std::cout << "================================================================================" << std::endl;
+        std::cout << "  ==> Spawning concurrent async threads across 15 government endpoints..." << std::endl;
+
+        auto t0 = std::chrono::high_resolution_clock::now();
+        auto results = scraper.scrape_all_portals_for_corridor(scrape_all_corridor);
+        auto t1 = std::chrono::high_resolution_clock::now();
+        double total_ms = std::chrono::duration<double, std::milli>(t1 - t0).count();
+
+        std::cout << "  ==> Received " << results.size() << " observation envelopes in " << std::fixed << std::setprecision(2) << total_ms << " ms\n" << std::endl;
+
+        std::cout << "  +----+-------------------------+--------------------+---------+------------+----------------------------------+" << std::endl;
+        std::cout << "  | #  | Source Portal           | Ministry / Agency  | Status  | Latency    | RFC 6234 SHA-256 (First 16 chars)|" << std::endl;
+        std::cout << "  +----+-------------------------+--------------------+---------+------------+----------------------------------+" << std::endl;
+
+        for (size_t i = 0; i < results.size(); ++i) {
+            const auto& r = results[i];
+            std::string src = r.source_name;
+            if (src.size() > 23) src = src.substr(0, 20) + "...";
+            std::string min = r.ministry_or_agency;
+            if (min.size() > 18) min = min.substr(0, 15) + "...";
+            std::string hash_short = r.sha256.substr(0, 16) + "...";
+
+            std::cout << "  | " << std::setw(2) << (i + 1)
+                      << " | " << std::left << std::setw(23) << src
+                      << " | " << std::left << std::setw(18) << min
+                      << " | " << (r.success ? "200 OK " : "FAILED ")
+                      << " | " << std::right << std::setw(7) << std::fixed << std::setprecision(1) << r.latency_ms << " ms"
+                      << " | " << std::left << std::setw(32) << hash_short
+                      << " |" << std::endl;
+        }
+        std::cout << "  +----+-------------------------+--------------------+---------+------------+----------------------------------+" << std::endl;
+
+        auto metrics = scraper.get_metrics();
+        std::cout << "\n  [Telemetry Summary]" << std::endl;
+        std::cout << "    * Total Ingestion Jobs Executed: " << metrics.total_requests << std::endl;
+        std::cout << "    * Average Roundtrip Latency    : " << std::setprecision(2) << metrics.average_latency_ms << " ms" << std::endl;
+        std::cout << "    * Total Body Bytes Transferred : " << metrics.bytes_transferred << " bytes" << std::endl;
+        std::cout << "    * In-Memory Cache Deduplications: " << metrics.cache_hits << std::endl;
+        std::cout << "================================================================================\n" << std::endl;
+        return 0;
+    }
+
+    if (do_scrape_portal) {
+        scrapers::WebScraper scraper;
+        std::cout << "\n================================================================================" << std::endl;
+        std::cout << "   DHARTI TARGETED PORTAL INGESTION: " << target_portal_id << std::endl;
+        std::cout << "================================================================================" << std::endl;
+        auto obs = scraper.scrape_portal(target_portal_id, target_record_id);
+        std::cout << "  * Source Name        : " << obs.source_name << std::endl;
+        std::cout << "  * Target URL         : " << obs.source_url << std::endl;
+        std::cout << "  * Record ID          : " << obs.record_id << std::endl;
+        std::cout << "  * HTTP Status        : " << obs.http_status << " (" << (obs.success ? "SUCCESS" : "ERROR") << ")" << std::endl;
+        std::cout << "  * Latency            : " << obs.latency_ms << " ms" << std::endl;
+        std::cout << "  * RFC 6234 SHA-256   : " << obs.sha256 << std::endl;
+        std::cout << "  * Ministry / Agency  : " << obs.ministry_or_agency << std::endl;
+        std::cout << "  * Statutory Basis    : " << obs.statutory_authority << std::endl;
+        std::cout << "\n  --- RAW OBSERVATION PAYLOAD SNIPPET ---" << std::endl;
+        std::string snippet = obs.raw_payload.substr(0, 500);
+        std::cout << snippet << (obs.raw_payload.size() > 500 ? "\n  ... [truncated]" : "") << std::endl;
+        std::cout << "================================================================================\n" << std::endl;
+        return 0;
+    }
+
+    if (do_search) {
+        scrapers::WebScraper scraper;
+        auto results = scraper.search_corridors(search_query);
+        std::cout << "\n================================================================================" << std::endl;
+        std::cout << "   DHARTI GENERALIZED CORRIDOR DISCOVERY (QUERY: \"" << search_query << "\")" << std::endl;
+        std::cout << "================================================================================" << std::endl;
+        std::cout << "  Found " << results.size() << " matching national corridor project(s):\n" << std::endl;
+        for (size_t i = 0; i < results.size(); ++i) {
+            const auto& r = results[i];
+            std::cout << "  [" << (i + 1) << "] " << r.project_name << " (" << r.highway_no << ")" << std::endl;
+            std::cout << "      * Project ID        : " << r.project_id << std::endl;
+            std::cout << "      * State / District  : " << r.state << " (" << r.district << ", " << r.taluk << ")" << std::endl;
+            std::cout << "      * Proposal / Gazette: " << r.proposal_no << " | " << r.gazette_no << std::endl;
+            std::cout << "      * Status            : " << r.clearance_status << std::endl;
+            std::cout << "      * Forest Area / Acq : " << r.diversion_area_ha << " Ha / " << r.acquired_area_ha << " Ha" << std::endl;
+            std::cout << "      * GPS Coordinates   : " << r.location.latitude << "° N, " << r.location.longitude
+                      << "° E (Elev: " << r.location.elevation_m << "m)" << std::endl;
+            std::cout << "      * Document Proof    : " << r.proof.document_title << " [" << r.proof.official_letter_no << "]" << std::endl;
+            std::cout << "      * RFC 6234 SHA-256  : " << r.sha256 << "\n" << std::endl;
+        }
+        return 0;
+    }
+
+    if (do_explain) {
+        std::vector<services::Interval> intervals = {
+            {101, 0.0, 3.0, true},
+            {102, 3.0, 5.0, true},
+            {118, 5.0, 6.5, false}, // Bottleneck parcel P-118
+            {104, 6.5, 10.0, true},
+            {105, 10.0, 12.0, false}
+        };
+        services::ExplanatoryQueryEngine engine(std::make_shared<services::PCIEngine>());
+        auto resp = engine.answer_query(explain_query, corridor_km, intervals);
+        std::cout << engine.format_console_report(resp);
+        return 0;
+    }
+
+    if (do_proof) {
+        scrapers::WebScraper scraper;
+        auto results = scraper.search_corridors(proof_id);
+        if (results.empty()) {
+            std::cout << "[ERROR] No project found matching identifier: " << proof_id << std::endl;
+            return 1;
+        }
+        const auto& r = results[0];
+        std::cout << "\n================================================================================" << std::endl;
+        std::cout << "   DHARTI OFFICIAL EVIDENTIARY DOCUMENT PROOF & GEOTAG CERTIFICATE             " << std::endl;
+        std::cout << "================================================================================" << std::endl;
+        std::cout << "  Document Title       : " << r.proof.document_title << std::endl;
+        std::cout << "  Document Type        : " << r.proof.document_type << std::endl;
+        std::cout << "  Issuing Authority    : " << r.proof.issuing_authority << std::endl;
+        std::cout << "  Official Letter/S.O. : " << r.proof.official_letter_no << std::endl;
+        std::cout << "  Signatory Officer    : " << r.proof.signatory_officer_name << " (" << r.proof.signatory_designation << ")" << std::endl;
+        std::cout << "  Digital Signature    : " << r.proof.digital_signature_hash << std::endl;
+        std::cout << "  Issuance / Effective : " << r.proof.issuance_date << " / " << r.proof.effective_date << std::endl;
+        std::cout << "  GPS Geotag Location  : " << r.location.latitude << "° N, " << r.location.longitude << "° E" << std::endl;
+        std::cout << "  Elevation / Chainage : " << r.location.elevation_m << "m | Km " << r.location.chainage_start_km << " - " << r.location.chainage_end_km << std::endl;
+        std::cout << "  Survey Agency / IMEI : " << r.location.survey_agency << " [" << r.location.device_imei << "]" << std::endl;
+        std::cout << "  Polygon WKT          : " << r.location.boundary_wkt << std::endl;
+        std::cout << "  Drive Vault URL      : " << r.proof.drive_web_link << std::endl;
+        std::cout << "  RFC 6234 SHA-256     : " << r.proof.rfc6234_sha256 << std::endl;
+        std::cout << "\n  --- STATUTORY CONDITIONS & SANCTIONS ---" << std::endl;
+        for (const auto& cond : r.proof.conditions_or_clauses) {
+            std::cout << "    * " << cond << std::endl;
+        }
+        std::cout << "================================================================================\n" << std::endl;
+        return 0;
     }
 
     if (run_bench) {

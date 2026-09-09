@@ -88,6 +88,12 @@
     <button class="nav-tab-btn active" data-tab="project-tracker">
       <span>🏛️ Project Search & Live Tracking (परियोजना खोज)</span>
     </button>
+    <button class="nav-tab-btn" data-tab="explanatory-ai">
+      <span>💡 Explanatory Query & AI Diagnosis</span>
+    </button>
+    <button class="nav-tab-btn" data-tab="history-timeline">
+      <span>⏱️ Bitemporal History & Datasets</span>
+    </button>
     <button class="nav-tab-btn" data-tab="cockpit">
       <span>Executive Cockpit & GIS Map</span>
     </button>
@@ -234,6 +240,42 @@
         </div>
       </div>
 
+      <!-- FEDERATED MULTI-SOURCE SCRAPER HUB (15 AUTHORITATIVE PORTALS) -->
+      <div class="scraper-hub-card">
+        <div class="scraper-hub-header">
+          <div class="scraper-hub-title-box">
+            <div class="scraper-hub-title">
+              <span>🏛️</span> Federated Multi-Source Scraper Hub (15 Official Indian Portals)
+            </div>
+            <div class="scraper-hub-subtitle">
+              Pure C++17 Multi-Threaded Engine (RFC 6234 SHA-256 Checksums • In-Memory Deduplication Cache • Sub-Second Ingestion)
+            </div>
+          </div>
+          <div class="scraper-hub-actions">
+            <span class="badge-portals-online">✓ 15 / 15 PORTALS OPERATIONAL</span>
+            <button id="btn-scrape-all-portals" class="btn-scrape-all">
+              <span>⚡ Run Concurrent 15-Agency Scrape</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter category tabs -->
+        <div class="portal-category-filters" id="portal-category-filters">
+          <button class="portal-cat-btn active" data-cat="ALL">All Portals (15)</button>
+          <button class="portal-cat-btn" data-cat="CLEARANCES_ENVIRONMENT">Clearances & Environment (2)</button>
+          <button class="portal-cat-btn" data-cat="LAND_ACQUISITION_CENTRAL">Central LA & Gazette (3)</button>
+          <button class="portal-cat-btn" data-cat="REVENUE_RECORDS_STATE">State RoR Records (6)</button>
+          <button class="portal-cat-btn" data-cat="JUDICIAL_LITIGATION">Judiciary & Courts (1)</button>
+          <button class="portal-cat-btn" data-cat="GIS_SPATIAL_SATELLITE">GIS & Space (2)</button>
+          <button class="portal-cat-btn" data-cat="FINANCIAL_TREASURY">Finance & Treasury (1)</button>
+        </div>
+
+        <!-- Portal Grid Container -->
+        <div class="portal-grid" id="portal-grid-container">
+          <!-- Dynamically populated by project_tracker.js -->
+        </div>
+      </div>
+
       <!-- Real-Time Evidentiary Dossier Cards (Google Drive Connected) -->
       <div class="dossier-grid">
         
@@ -260,8 +302,13 @@
           </div>
 
           <div class="dossier-field-row">
-            <span class="dossier-field-label">Evidence Vault Location:</span>
-            <span class="dossier-field-value" style="font-family: var(--font-mono); font-size: 0.78rem;">dharti/raw/parivesh/2026/09/07/</span>
+            <span class="dossier-field-label">GPS Geotag Fix:</span>
+            <span class="dossier-field-value text-mono text-purple" id="res-geotag-coords" style="font-weight: 700; color: #4338ca;">13.1986° N, 77.7066° E</span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">DGPS Accuracy:</span>
+            <span class="dossier-field-value" id="res-geotag-accuracy">±1.2m (Trimble R12 GNSS)</span>
           </div>
 
           <div class="dossier-field-row">
@@ -274,10 +321,12 @@
             <span class="dossier-field-value" id="res-fc-drive-id" style="font-family: var(--font-mono); font-size: 0.76rem; color: #4338ca;">1cBP6hQGUXv9rQXTk7KSfk4XRa7V64MR6</span>
           </div>
 
-          <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 0.72rem; color: #16a34a; font-weight: 700;">✓ RFC 6234 Checksum Validated</span>
+          <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <button id="btn-proof-fc" type="button" class="btn-gov-primary" style="padding: 6px 12px; font-size: 0.78rem;">
+              <span>📜 View Official Document Proof & Geotag</span>
+            </button>
             <a id="res-fc-drive-link" href="https://drive.google.com/file/d/1cBP6hQGUXv9rQXTk7KSfk4XRa7V64MR6/view?usp=drivesdk" target="_blank" class="drive-vault-link-btn">
-              <span>📁 Open in Google Drive Vault</span> ↗
+              <span>📁 Open in Vault</span> ↗
             </a>
           </div>
         </div>
@@ -305,13 +354,13 @@
           </div>
 
           <div class="dossier-field-row">
-            <span class="dossier-field-label">Acquired Area (Hectares):</span>
-            <span class="dossier-field-value" id="res-gz-area">48.75 Ha</span>
+            <span class="dossier-field-label">Corridor Chainage:</span>
+            <span class="dossier-field-value text-mono" id="res-geotag-chainage">Km 0.00 to Km 12.00</span>
           </div>
 
           <div class="dossier-field-row">
-            <span class="dossier-field-label">Evidence Vault Location:</span>
-            <span class="dossier-field-value" style="font-family: var(--font-mono); font-size: 0.78rem;">dharti/raw/bhoomi_rashi/2026/09/07/</span>
+            <span class="dossier-field-label">Field Surveyor:</span>
+            <span class="dossier-field-value" id="res-geotag-surveyor">Shri R. K. Sharma (CALA / SLAO)</span>
           </div>
 
           <div class="dossier-field-row">
@@ -324,15 +373,65 @@
             <span class="dossier-field-value" id="res-gz-drive-id" style="font-family: var(--font-mono); font-size: 0.76rem; color: #4338ca;">1yBeG1CXKlOGIjwLh5urKlBPBfG4IjveJ</span>
           </div>
 
-          <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 0.72rem; color: #16a34a; font-weight: 700;">✓ Gazette Schedule Reconciled</span>
+          <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <button id="btn-proof-gz" type="button" class="btn-gov-primary" style="padding: 6px 12px; font-size: 0.78rem;">
+              <span>📜 View Gazette Schedule & Geotag</span>
+            </button>
             <a id="res-gz-drive-link" href="https://drive.google.com/file/d/1yBeG1CXKlOGIjwLh5urKlBPBfG4IjveJ/view?usp=drivesdk" target="_blank" class="drive-vault-link-btn">
-              <span>📁 Open in Google Drive Vault</span> ↗
+              <span>📁 Open in Vault</span> ↗
             </a>
           </div>
         </div>
 
+        <!-- Card 3: Revenue RoR & Joint Measurement Survey (JMS) -->
+        <div class="gov-card">
+          <div class="gov-card-header">
+            <div>
+              <div class="gov-card-title">
+                <span>📑</span> State Revenue RoR & JMS Memo
+              </div>
+              <div class="gov-card-subtitle">Land Records Department (Bhoomi / Bhulekh)</div>
+            </div>
+            <span class="status-badge-gov bg-gov-info">✓ CERTIFIED RTC & KHATAUNI</span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">Target Survey / Khasra:</span>
+            <span class="dossier-field-value font-mono font-semibold text-navy">Sy No. 118/2A (Kundana)</span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">Tenure & Registered Patta:</span>
+            <span class="dossier-field-value">Ancestral Patta (Disputed Succession)</span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">JMS Survey Polygon:</span>
+            <span class="dossier-field-value text-mono text-purple">10,020 sqm (Cadastral Reconciled)</span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">PFMS Compensation Mandate:</span>
+            <span class="dossier-field-value font-semibold text-green">₹ 45,00,000 (Queued for DBT)</span>
+          </div>
+
+          <div class="dossier-field-row">
+            <span class="dossier-field-label">Judicial Exception Docket:</span>
+            <span class="dossier-field-value text-red font-semibold">High Court WP 4021/2023</span>
+          </div>
+
+          <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <button id="btn-proof-ror" type="button" class="btn-gov-primary" style="padding: 6px 12px; font-size: 0.78rem; background: #4f46e5;">
+              <span>📜 View Certified RoR & Field Memo</span>
+            </button>
+            <span style="font-size: 0.72rem; color: #16a34a; font-weight: 700;">✓ Section 23A Aligned</span>
+          </div>
+        </div>
+
       </div>
+
+      <!-- Container for Bitemporal Version History & Side-by-Side Diff Table -->
+      <div id="res-bitemporal-history" style="margin-bottom: 24px;"></div>
 
       <!-- 7-Rule Evidence Gate Automated Integrity Verdict -->
       <div class="gov-card" style="margin-bottom: 24px;">
@@ -869,6 +968,73 @@
       <div id="mis-report-view"></div>
     </section>
 
+    <!-- TAB 7: EXPLANATORY QUERY & STATUTORY AI DIAGNOSIS -->
+    <section id="panel-explanatory-ai" class="tab-content-panel">
+      <div class="tracker-hero-banner">
+        <h2 class="tracker-hero-title">
+          <span>💡</span>
+          <span>व्याख्यात्मक प्रश्न एवं वैधानिक निदान इंजन | Explanatory Query & Statutory Diagnosis Engine</span>
+        </h2>
+        <p class="tracker-hero-subtitle">
+          Ask complex natural language questions regarding corridor bottlenecks, legal injunctions, Social Impact Assessment (SIA) vulnerable family compliance, and Evidence Gate quarantines. Evaluated by pure C++ rules referencing the RFCTLARR Act 2013 and National Highways Act 1956.
+        </p>
+
+        <!-- Quick Question Prompts -->
+        <div class="quick-select-bar" style="margin-top: 14px;">
+          <span class="quick-select-label">सुझावित प्रश्न / Quick Explanatory Prompts:</span>
+          <button class="quick-explain-btn" data-query="Why is Bengaluru-Chennai corridor blocked?">🎯 Why is NE-7 blocked?</button>
+          <button class="quick-explain-btn" data-query="Show me geotagged proof for Bengaluru-Chennai">📍 Show Geotagged Proof</button>
+          <button class="quick-explain-btn" data-query="What is the legal stay order status?">⚖️ Check Legal Court Stays</button>
+          <button class="quick-explain-btn" data-query="Audit SIA vulnerable families and census">👥 Audit SIA Vulnerable Families</button>
+          <button class="quick-explain-btn" data-query="Why did Evidence Gate quarantine proposal EC24B012PB109231?">🛡️ Anomaly Quarantine Reason</button>
+        </div>
+      </div>
+
+      <!-- Query Form Card -->
+      <div class="search-form-card" style="margin-bottom: 20px;">
+        <h3 style="font-size: 1rem; color: #002147; font-weight: 800; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+          <span>🔍</span> Ask Natural Language Statutory Question
+        </h3>
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <input type="text" id="explanatory-user-input" class="form-input-gov" style="flex: 1; min-width: 280px; font-size: 0.95rem; padding: 12px 16px;" placeholder="e.g. Why is NE-7 corridor blocked? or What is the status of court stay on P-118?">
+          <button id="btn-run-explanatory-query" class="btn-gov-primary" style="padding: 12px 24px; font-size: 0.95rem;">
+            <span>⚡ Run Statutory Diagnosis</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Result Card Container -->
+      <div id="explanatory-result-container">
+        <!-- Rendered dynamically by explanatory engine -->
+      </div>
+    </section>
+
+    <!-- TAB 8: BITEMPORAL REVISION HISTORY & NATIONAL DATASETS -->
+    <section id="panel-history-timeline" class="tab-content-panel">
+      <div class="tracker-hero-banner">
+        <h2 class="tracker-hero-title">
+          <span>⏱️</span>
+          <span>द्विकालिक संशोधन इतिहास एवं राष्ट्रीय डेटासेट | Bitemporal Revision History & Multi-Corridor Ledger</span>
+        </h2>
+        <p class="tracker-hero-subtitle">
+          Cryptographically immutable bitemporal audit trail separating Real-World Valid Time (Tv) from System Transaction Time (Tt). Inspect historical versions, authorized signatories, side-by-side attribute deltas, and SHA-256 vault hashes.
+        </p>
+
+        <div class="quick-select-bar">
+          <span class="quick-select-label">Select National Corridor:</span>
+          <button class="history-select-btn active-history-btn" data-pid="NHAI-NE7-PKG-04">Bengaluru-Chennai (NE-7)</button>
+          <button class="history-select-btn" data-pid="NHAI-NE4-PKG-17">Delhi-Mumbai (NE-4)</button>
+          <button class="history-select-btn" data-pid="NHAI-NE5-PKG-05">Delhi-Amritsar-Katra (NE-5)</button>
+          <button class="history-select-btn" data-pid="NHAI-NH319B-PKG-06">Varanasi-Ranchi-Kolkata (NH-319B)</button>
+          <button class="history-select-btn" data-pid="NHAI-NE2-PKG-02">Eastern Peripheral (NE-II)</button>
+        </div>
+      </div>
+
+      <div id="history-timeline-view-container" style="margin-top: 20px;">
+        <!-- Injected dynamically -->
+      </div>
+    </section>
+
   </main>
 
   <!-- Official Government Portal Footer (GIGW 3.0 & NIC Compliant) -->
@@ -917,13 +1083,16 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <!-- Application Modules -->
-  <script src="js/data_store.js"></script>
-  <script src="js/pci_engine.js"></script>
-  <script src="js/map_view.js"></script>
-  <script src="js/test_sandbox.js"></script>
-  <script src="js/mis_reports.js"></script>
-  <script src="js/project_tracker.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/data_store.js?v=2.3.0"></script>
+  <script src="js/pci_engine.js?v=2.3.0"></script>
+  <script src="js/map_view.js?v=2.3.0"></script>
+  <script src="js/test_sandbox.js?v=2.3.0"></script>
+  <script src="js/mis_reports.js?v=2.3.0"></script>
+  <script src="js/document_proof_modal.js?v=2.3.0"></script>
+  <script src="js/explanatory_engine.js?v=2.3.0"></script>
+  <script src="js/dharini_assistant.js?v=2.3.0"></script>
+  <script src="js/project_tracker.js?v=2.3.0"></script>
+  <script src="js/app.js?v=2.3.0"></script>
 
   <!-- Test Runner Glue -->
   <script>
