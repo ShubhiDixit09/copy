@@ -79,3 +79,22 @@ Before any external clearance snapshot modifies state or triggers canonical work
 - `CLEARANCE_APPROVED`: Emitted upon official grant of Stage-1/Stage-2 Forest Clearance or Environmental Clearance.
 - `EVIDENCE_QUARANTINED`: Emitted when any of the 7 rules trip, preventing state pollution and alerting compliance teams.
 
+## 8.5 Federated 15-Portal Scraping Mesh & Concurrent Ingestion Orchestrator
+
+To capture the complete multi-agency land acquisition lifecycle across India, DHARTI implements a 15-portal federated scraping mesh (`include/dharti/scrapers/web_scraper.hpp`):
+
+| Category | Endpoint Count | Portals Ingested | Statutory Authority & Data Ingested |
+| :--- | :--- | :--- | :--- |
+| **Clearances & Environment** | 2 | MoEFCC PARIVESH 2.0, NGT Case Management | Forest (Conservation) Act 1980, EIA 2006, NGT Act 2010 |
+| **Central Land Acquisition** | 3 | MoRTH Bhoomi Rashi, eGazette of India, NHAI DKP | NH Act 1956 §3A/3D, IT Act 2000, NHAI Act 1988 |
+| **State Revenue & Cadastral** | 6 | Karnataka Bhoomi, UP Bhulekh, Gujarat AnyRoR, Punjab Jamabandi, Jharkhand Jharbhoomi, Maharashtra Mahabhulekh | State Land Revenue Codes (RoR Form 16, 7/12 Satbara, Jamabandi, Khatian, Mutations) |
+| **Judiciary & Litigation** | 1 | eCourts Services / National Judicial Data Grid (NJDG) | Constitution Article 226, CPC 1908 (Writ Stays & Injunctions) |
+| **Geospatial & Geodetic** | 2 | ISRO Bhuvan GIS, Survey of India Nakshe & CORS | National Geospatial Policy 2022, CORS DGPS Ground Control Points |
+| **Finance & Treasury Audit** | 1 | Public Financial Management System (PFMS) | GFR 2017, RFCTLARR Act 2013 §38 (Direct Benefit Transfer Settlement) |
+
+### Parallel Non-Blocking Orchestration
+- Implemented in pure C++17 via `std::async(std::launch::async, ...)` in `WebScraper::scrape_all_portals_for_corridor()`.
+- Thread-safe telemetry tracking with mutexes (`m_metrics_mutex`, `m_cache_mutex`).
+- Multi-tier fallback handling with RFC 6234 standard SHA-256 seal and in-memory deduplication cache.
+
+

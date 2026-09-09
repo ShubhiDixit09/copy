@@ -12,6 +12,8 @@ This directory contains in-depth architectural feasibility studies, mathematical
 | **[DHARTI-ANALYSIS-002](02_pci_algorithm_complexity_and_benchmarks.md)** | Algorithmic Complexity & Benchmark Analysis | Possession Continuity Index (PCI) interval merge $O(M \log M)$, bottleneck unlock simulation $O(K \cdot M \log M)$, and empirical benchmarks. |
 | **[DHARTI-ANALYSIS-003](03_social_safeguards_and_legal_compliance.md)** | Social Safeguards & Legal Compliance Analysis | RFCTLARR Act 2013, World Bank ESS5, "No Family Invisible" rule, and non-titleholder livelihood protections. |
 | **[DHARTI-ANALYSIS-004](04_hybrid_cloud_storage_feasibility.md)** | Hybrid Cloud Storage Feasibility & Effectiveness | Neon Serverless PostgreSQL + Google Drive Webhook Vault, ₹0 operational cost, 4-tier schema, and 7-rule evidence gate. |
+| **[DHARTI-ANALYSIS-005](05_nicci_ai_assistant_and_explanatory_query_feasibility.md)** | NICCI AI Assistant, Explanatory Query Engine & Geotagged Proofs | Section 65B electronic record admissibility, sub-meter DGPS survey verification, multi-criteria corridor tokenizer, deterministic RFCTLARR §38 diagnosis, and speech-enabled NICCI UI. |
+| **[DHARTI-ANALYSIS-006](06_federated_multi_source_scraping_feasibility.md)** | Federated Multi-Source Scraping Mesh (15 Portals) & Telemetry | 15 authoritative portals (PARIVESH, NGT, Bhoomi Rashi, eGazette, DKP, eCourts, 6 State RoRs, Bhuvan, SOI, PFMS), concurrent `std::async` parallelization, and in-memory deduplication caching. |
 
 ---
 

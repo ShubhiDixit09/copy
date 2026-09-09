@@ -1,6 +1,7 @@
 #include "dharti/storage/gdrive_client.hpp"
 #include "dharti/utils/sha256.hpp"
 #include <cstdlib>
+#include <cstdio>
 #include <sstream>
 #include <iomanip>
 #include <chrono>
@@ -102,16 +103,22 @@ GDriveUploadResult GDriveClient::upload_raw_snapshot(
                 << "}";
     }
 
-    // Pure C++ invocation of native Windows curl.exe (zero Python dependency)
+    // Pure C++ invocation of native curl (zero Python dependency)
+#if defined(_WIN32) || defined(_WIN64)
     std::string cmd = "curl.exe -s -L -H \"Content-Type: application/json\" --data-binary \"@" +
                       temp_payload_file + "\" \"" + m_webhook_url + "\"";
+    FILE* pipe = _popen(cmd.c_str(), "r");
+#else
+    std::string cmd = "curl -s -L -H \"Content-Type: application/json\" --data-binary \"@" +
+                      temp_payload_file + "\" \"" + m_webhook_url + "\"";
+    FILE* pipe = popen(cmd.c_str(), "r");
+#endif
 
     std::array<char, 512> buffer;
     std::string response_str;
-    FILE* pipe = _popen(cmd.c_str(), "r");
     if (!pipe) {
         res.success = false;
-        res.error_message = "Failed to execute curl.exe uploader process";
+        res.error_message = "Failed to execute curl uploader process";
         remove(temp_payload_file.c_str());
         return res;
     }
@@ -119,7 +126,11 @@ GDriveUploadResult GDriveClient::upload_raw_snapshot(
     while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
         response_str += buffer.data();
     }
+#if defined(_WIN32) || defined(_WIN64)
     _pclose(pipe);
+#else
+    pclose(pipe);
+#endif
     remove(temp_payload_file.c_str());
 
     // Parse JSON response for file_id, web_link, status

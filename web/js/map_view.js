@@ -21,12 +21,32 @@ class MapView {
       zoomControl: true
     });
 
-    // CartoDB Positron - Pristine Light Theme Map Tiles
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
+    // Keyless, high-performance OpenStreetMap & Esri GIS basemap layers (No API key required)
+    const osmStreet = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | Government of India GIS',
       maxZoom: 19
-    }).addTo(this.map);
+    });
+
+    const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri &mdash; High-Resolution Satellite Imagery',
+      maxZoom: 19
+    });
+
+    const esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles &copy; Esri &mdash; Topographic GIS',
+      maxZoom: 19
+    });
+
+    // Default to clean OpenStreetMap (100% free, zero watermarks)
+    osmStreet.addTo(this.map);
+
+    // Interactive Base Map Selector
+    const baseLayers = {
+      "🗺️ Clean Street Map (OSM)": osmStreet,
+      "🛰️ Satellite Imagery (Esri)": esriSatellite,
+      "🏔️ Topographic GIS (Esri)": esriTopo
+    };
+    L.control.layers(baseLayers, null, { position: 'topright' }).addTo(this.map);
 
     this.renderParcels();
   }

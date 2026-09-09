@@ -71,6 +71,48 @@ struct SourceSnapshot {
 };
 
 /**
+ * @brief Precise GPS Geo-tagged coordinate location for real-world field verification.
+ */
+struct GeoLocation {
+    double latitude{0.0};
+    double longitude{0.0};
+    double elevation_m{0.0};
+    double chainage_start_km{0.0};
+    double chainage_end_km{0.0};
+    std::string utm_zone{"43N"};
+    std::string survey_agency{"Survey of India & CALA Joint Team"};
+    std::string surveyor_officer;
+    std::string device_imei;
+    double gps_accuracy_meters{1.5};
+    std::string geotag_timestamp_utc;
+    std::string boundary_wkt; // Well-Known Text polygon
+    std::string bhuvan_gis_reference;
+};
+
+/**
+ * @brief Structured official government document proof with cryptographic audit seal.
+ */
+struct DocumentProof {
+    std::string document_id;
+    std::string document_type;        // "STAGE1_FOREST_CLEARANCE", "GAZETTE_3D_NOTIFICATION", "ROR_JAMABANDI", "JMS_INSPECTION_MEMO"
+    std::string document_title;
+    std::string issuing_authority;    // "MoEFCC Regional Office", "Ministry of Road Transport and Highways", "Revenue Department"
+    std::string official_letter_no;
+    std::string gazette_so_number;
+    std::string signatory_officer_name;
+    std::string signatory_designation;
+    std::string digital_signature_hash;
+    std::string issuance_date;
+    std::string effective_date;
+    std::vector<std::string> conditions_or_clauses;
+    GeoLocation location;
+    std::string drive_file_id;
+    std::string drive_web_link;
+    std::string rfc6234_sha256;
+    bool is_verified{true};
+};
+
+/**
  * @brief Bridge entity between Google Drive evidence vault and Neon DB control plane.
  */
 struct EvidenceArtifact {
@@ -91,6 +133,8 @@ struct EvidenceArtifact {
     std::string supersedes_artifact_id;
     std::string acceptance_status{"PENDING"}; // "PENDING", "ACCEPTED", "QUARANTINED", "REJECTED"
     std::string rejection_reason;
+    GeoLocation location;
+    DocumentProof proof;
 };
 
 /**

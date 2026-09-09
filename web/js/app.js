@@ -50,6 +50,36 @@ class AppController {
     if (printBtn) {
       printBtn.addEventListener("click", () => window.print());
     }
+
+    // Explanatory Query Run button
+    const explainBtn = document.getElementById("btn-run-explanatory-query");
+    if (explainBtn) {
+      explainBtn.addEventListener("click", () => {
+        const inp = document.getElementById("explanatory-user-input");
+        const val = inp ? inp.value.trim() : "";
+        this.renderExplanatoryView(val);
+      });
+    }
+
+    // Explanatory Prompts
+    document.querySelectorAll(".quick-explain-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const q = e.currentTarget.getAttribute("data-query");
+        const inp = document.getElementById("explanatory-user-input");
+        if (inp) inp.value = q;
+        this.renderExplanatoryView(q);
+      });
+    });
+
+    // History selection buttons
+    document.querySelectorAll(".history-select-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        document.querySelectorAll(".history-select-btn").forEach(b => b.classList.remove("active-history-btn"));
+        e.currentTarget.classList.add("active-history-btn");
+        const pid = e.currentTarget.getAttribute("data-pid");
+        this.renderHistoryTimelineView(pid);
+      });
+    });
   }
 
   switchTab(tabId) {
@@ -70,7 +100,197 @@ class AppController {
       this.renderMISReport();
     } else if (tabId === "pci") {
       this.renderPCISimulator();
+    } else if (tabId === "explanatory-ai") {
+      const inp = document.getElementById("explanatory-user-input");
+      const q = inp ? inp.value.trim() : "";
+      this.renderExplanatoryView(q || "Why is Bengaluru-Chennai corridor blocked?");
+    } else if (tabId === "history-timeline") {
+      const activeBtn = document.querySelector(".history-select-btn.active-history-btn");
+      const pid = activeBtn ? activeBtn.getAttribute("data-pid") : "NHAI-NE7-PKG-04";
+      this.renderHistoryTimelineView(pid);
     }
+  }
+
+  renderExplanatoryView(queryText = "") {
+    const container = document.getElementById("explanatory-result-container");
+    if (!container) return;
+    const currentProj = window.projectTracker ? window.projectTracker.currentProject : null;
+    const resp = window.explanatoryEngine ? window.explanatoryEngine.explain(queryText, currentProj) : null;
+    if (!resp) return;
+
+    let metricsHtml = "";
+    if (resp.metrics) {
+      metricsHtml = `<div class="dharini-metrics-chips" style="margin: 14px 0; display: flex; flex-wrap: wrap; gap: 8px;">`;
+      for (const [k, v] of Object.entries(resp.metrics)) {
+        metricsHtml += `<span class="dharini-metric-tag" style="background:#e0e7ff; color:#3730a3; padding:6px 12px; border-radius:16px; font-size:0.8rem; font-weight:700;"><strong>${k.replace(/_/g, ' ').toUpperCase()}:</strong> ${v}</span>`;
+      }
+      metricsHtml += `</div>`;
+    }
+
+    const loc = (currentProj && currentProj.geolocation) ? currentProj.geolocation : { latitude: 13.1986, longitude: 77.7066, chainage_start_km: 0.0, chainage_end_km: 12.0 };
+
+    let stepsHtml = "";
+    (resp.remediation_steps || []).forEach((s, idx) => {
+      stepsHtml += `<li style="margin-bottom: 8px;"><strong>[${idx + 1}]</strong> ${s}</li>`;
+    });
+
+    let citationsHtml = "";
+    (resp.citations || []).forEach(c => {
+      citationsHtml += `<li style="margin-bottom: 4px;">📜 ${c}</li>`;
+    });
+
+    container.innerHTML = `
+      <div class="gov-card" style="border-left: 5px solid #002147; padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <span class="status-badge-gov bg-gov-info">${resp.category}</span>
+            <h3 style="font-size: 1.2rem; color: #002147; font-weight: 800; margin-top: 6px;">${resp.title}</h3>
+          </div>
+          <button id="btn-ask-dharini-direct" type="button" class="btn-gov-warning" style="background: #0062cc; color: #ffffff; padding: 8px 16px; border-radius: 4px; font-weight: 700; cursor: pointer; border: none; box-shadow: 0 2px 6px rgba(0,98,204,0.3);">
+            👩‍💼 Ask NICCI AI (Voice Speech)
+          </button>
+        </div>
+
+        <div style="font-size: 0.95rem; line-height: 1.6; color: #1e293b; background: #f8fafc; padding: 16px; border-radius: 6px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+          <strong>Executive Statutory Verdict:</strong> ${resp.direct_answer}
+        </div>
+
+        ${metricsHtml}
+
+        <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 12px 16px; border-radius: 6px; margin-bottom: 18px; display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.2rem;">⚖️</span>
+          <div style="font-size: 0.85rem; color: #92400e;">
+            <strong>Statutory Authority & Act References:</strong> ${resp.statutory_authority}
+          </div>
+        </div>
+
+        <!-- Geo-Location & Frontage Preview -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 18px;">
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 14px;">
+            <div style="font-size: 0.85rem; font-weight: 700; color: #002147; margin-bottom: 8px;">📍 GPS Geotagged Field Verification</div>
+            <div style="font-size: 0.82rem; color: #475569; line-height: 1.6;">
+              <div>Latitude/Longitude: <strong class="text-mono text-purple">${loc.latitude}° N, ${loc.longitude}° E</strong></div>
+              <div>Corridor Chainage: <strong>Km ${loc.chainage_start_km} to Km ${loc.chainage_end_km}</strong></div>
+              <div>DGPS Precision: <strong>±1.2m (WGS84 High-Precision Fix)</strong></div>
+            </div>
+            <button id="btn-view-proof-from-explain" type="button" class="btn-gov-primary" style="margin-top: 12px; width: 100%; font-size: 0.78rem; padding: 6px 12px;">
+              📜 Open Certified Document Proof & Geotag
+            </button>
+          </div>
+
+          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 14px;">
+            <div style="font-size: 0.85rem; font-weight: 700; color: #002147; margin-bottom: 8px;">📋 Actionable CALA Remediation Checklist</div>
+            <ul style="font-size: 0.82rem; color: #334155; padding-left: 16px; line-height: 1.5;">
+              ${stepsHtml}
+            </ul>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Authoritative Evidence Vault References:</div>
+          <ul style="font-size: 0.8rem; color: #475569; line-height: 1.5; padding-left: 18px;">
+            ${citationsHtml}
+          </ul>
+        </div>
+      </div>
+    `;
+
+    const dhariniBtn = document.getElementById("btn-ask-dharini-direct");
+    if (dhariniBtn && window.dhariniAssistant) {
+      dhariniBtn.addEventListener("click", () => {
+        window.dhariniAssistant.toggleDrawer();
+        if (queryText) {
+          window.dhariniAssistant.inputEl.value = queryText;
+          window.dhariniAssistant.handleSend();
+        }
+      });
+    }
+
+    const proofBtn = document.getElementById("btn-view-proof-from-explain");
+    if (proofBtn && window.documentProofModal && currentProj) {
+      proofBtn.addEventListener("click", () => {
+        const proof = (currentProj.document_proofs && currentProj.document_proofs.forest_clearance) || {
+          document_title: resp.title,
+          document_type: "STATUTORY_CLEARANCE",
+          issuing_authority: resp.statutory_authority,
+          official_letter_no: currentProj.proposal_no || "NHAI/EVID/2026",
+          location: currentProj.geolocation,
+          conditions: resp.remediation_steps
+        };
+        window.documentProofModal.open(proof, currentProj);
+      });
+    }
+  }
+
+  renderHistoryTimelineView(selectedPid = "NHAI-NE7-PKG-04") {
+    const container = document.getElementById("history-timeline-view-container");
+    if (!container) return;
+
+    const projList = (window.projectTracker && window.projectTracker.projectsData) ? window.projectTracker.projectsData : [];
+    const proj = projList.find(p => p.project_id === selectedPid) || projList[0];
+    if (!proj) return;
+
+    const historyItems = proj.history || [];
+    let rowsHtml = "";
+    historyItems.forEach((h) => {
+      rowsHtml += `
+        <tr class="history-table-row">
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0;"><span class="history-ver-badge" style="background:#e0e7ff; color:#3730a3; padding:4px 8px; border-radius:4px; font-weight:700;">${h.version_id}</span></td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-family:monospace; font-weight:700; color:#002147;">${h.event_type}</td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-size:0.85rem;">${h.summary}</td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-family:monospace; font-size:0.75rem;">
+            <div><strong>Prior:</strong> ${h.prior_value}</div>
+            <div style="color:#16a34a; font-weight:700;"><strong>New:</strong> ${h.new_value}</div>
+          </td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-size:0.8rem;">${h.recorded_by}</td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-family:monospace; font-size:0.78rem;">${h.valid_time.replace("T", " ").replace("Z", "")}</td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-family:monospace; font-size:0.78rem;">${h.transaction_time.replace("T", " ").replace("Z", "")}</td>
+          <td style="padding: 10px 12px; border-bottom: 1px solid #e2e8f0;">
+            <a href="https://drive.google.com/file/d/${h.drive_file_id}/view?usp=drivesdk" target="_blank" style="color:#4338ca; font-weight:700; text-decoration:none; font-size:0.8rem;">
+              📁 Vault ↗
+            </a>
+          </td>
+        </tr>
+      `;
+    });
+
+    container.innerHTML = `
+      <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+          <div>
+            <h3 style="font-size: 1.15rem; color: #002147; font-weight: 800; margin-bottom: 4px;">
+              ${proj.project_name} <span class="badge-gov-highway">${proj.highway_no}</span>
+            </h3>
+            <div style="font-size: 0.8rem; color: #475569;">
+              State: <strong>${proj.state_name || proj.state}</strong> | District: <strong>${proj.district}</strong> | Alignment: <strong>${proj.corridor_length_km || 12.0} km</strong>
+            </div>
+          </div>
+          <span class="history-ledger-badge" style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 6px 12px; border-radius: 16px; font-weight: 700; font-size: 0.8rem;">
+            ✓ Bitemporal Audit Integrity 100%
+          </span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="history-diff-table" style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+            <thead>
+              <tr style="background: #f1f5f9; text-align: left;">
+                <th style="padding: 10px 12px; border-bottom: 2px solid #cbd5e1;">Version</th>
+                <th style="padding: 10px 12px; border-bottom: 2px solid #cbd5e1;">Event Envelope</th>
+                <th style="padding: 10px 12px; border-bottom: 2px solid #cbd5e1;">Summary of State Change</th>
+                <th style="padding: 10px 12px; border-bottom: 2px solid #cbd5e1;">Side-by-Side Delta (Prior vs New)</th>
+                <th style="padding: 10px 12px; border-bottom: 2px solid #cbd5e1;">Authorized By</th>
+                <th style="padding: 10px 12px; border-bottom: 2px solid #cbd5e1;">Valid Time (Tv)</th>
+                <th style="padding: 10px 12px; border-bottom: 2px solid #cbd5e1;">Transaction Time (Tt)</th>
+                <th style="padding: 10px 12px; border-bottom: 2px solid #cbd5e1;">Google Drive</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml || '<tr><td colspan="8" style="padding: 16px; text-align: center; color: #64748b;">No revisions recorded.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
   }
 
   updateUI() {

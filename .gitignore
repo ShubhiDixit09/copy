@@ -69,3 +69,12 @@ data/raw/
 data/processed/
 temp/
 tmp/
+
+# C++ Binaries & Test Runners
+bin/
+tests/cpp/test_dharti_core
+*.dylib
+*.so
+*.o
+*.a
+
